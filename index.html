@@ -283,14 +283,14 @@ html{scroll-behavior:smooth}
 
   <!-- FUN AWARDS (private) -->
   <section class="card" id="fun">
-    <div class="sec-head"><h2>紙盤子趣味獎</h2><span class="lock">🔒 獎項名稱大家都看得到；頒給誰和頒獎詞只有你自己看得到；不會顯示是誰填的</span></div>
+    <div class="sec-head"><h2>紙盤子趣味獎</h2><span class="lock">🔒 獎項名稱和頒獎詞大家都看得到；頒給誰只有你自己看得到；不會顯示是誰填的</span></div>
     <p class="hint" style="margin:-6px 0 0;color:var(--muted);font-size:13px">想一個好笑的獎項名稱，寫上要頒給誰。看看大家想到的獎項找靈感，一個人可以填好幾個！</p>
     <form class="form writer" id="funForm">
       <div class="row">
         <div><label class="lbl" for="fAward">獎項名稱</label><input id="fAward" required></div>
         <div><label class="lbl" for="fName">頒給誰</label><input id="fName" required></div>
       </div>
-      <div><label class="lbl" for="fSpeech">頒獎詞（可留空，之後也能補）</label><textarea id="fSpeech" rows="2" placeholder="例如：不管客戶多急，中午 12 點一到，他一定準時「下線」！"></textarea></div>
+      <div><label class="lbl" for="fSpeech">頒獎詞（大家都看得到，別寫出名字；可留空，之後也能補）</label><textarea id="fSpeech" rows="2" placeholder="例如：不管客戶多急，中午 12 點一到，他一定準時「下線」！"></textarea></div>
       <div><button class="btn primary" type="submit">送出</button></div>
     </form>
     <div class="meta" style="margin-top:12px;justify-content:space-between"><span id="funHead"></span><button class="btn link" id="adminBtn" type="button">管理者登入</button></div>
@@ -481,9 +481,10 @@ function renderFun(){
       const pv = priv[it.key];
       const see = pv && (it.mine || isAdmin);
       const editing = state.spEdit===it.key;
-      const sp = see && pv.speech ? `<div class="speech">${esc(pv.speech)}</div>` : "";
-      const ed = editing ? `<form class="sp-edit" data-key="${esc(it.key)}"><textarea name="sp" rows="3" aria-label="頒獎詞">${esc(pv&&pv.speech||"")}</textarea><div><button class="btn primary" type="submit">儲存頒獎詞</button> <button class="btn link" data-a="spCancel" type="button">取消</button></div></form>` : "";
-      return `<li><div style="flex:1"><span class="award">${esc(it.award)}</span>${see?` → ${esc(pv.name)}`:""}${it.mine?` <span class="chip grey">你填的</span>`:""}${editing?ed:sp}</div>${it.mine&&!editing?`<div style="white-space:nowrap"><button class="btn link" data-a="spEdit" data-key="${esc(it.key)}" type="button">${pv&&pv.speech?"改頒獎詞":"加頒獎詞"}</button><button class="btn link del" data-a="delF" data-key="${esc(it.key)}" type="button">刪除</button></div>`:""}</li>`;
+      const spText = it.speech || (see && pv.speech) || "";
+      const sp = spText ? `<div class="speech">${esc(spText)}</div>` : "";
+      const ed = editing ? `<form class="sp-edit" data-key="${esc(it.key)}"><textarea name="sp" rows="3" aria-label="頒獎詞">${esc(spText)}</textarea><div><button class="btn primary" type="submit">儲存頒獎詞</button> <button class="btn link" data-a="spCancel" type="button">取消</button></div></form>` : "";
+      return `<li><div style="flex:1"><span class="award">${esc(it.award)}</span>${see?` → ${esc(pv.name)}`:""}${it.mine?` <span class="chip grey">你填的</span>`:""}${editing?ed:sp}</div>${it.mine&&!editing?`<div style="white-space:nowrap"><button class="btn link" data-a="spEdit" data-key="${esc(it.key)}" type="button">${spText?"改頒獎詞":"加頒獎詞"}</button><button class="btn link del" data-a="delF" data-key="${esc(it.key)}" type="button">刪除</button></div>`:""}</li>`;
     }).join("");
   }
 
@@ -638,17 +639,18 @@ function myDoc(arr){ const d = arr.find(x=>x.id===me); return d ? (d.d.items||[]
     if(!me){ banner("還在連線中，請稍等幾秒再試。"); return; }
     const award=$("#fAward").value.trim(), name=$("#fName").value.trim(), speech=$("#fSpeech").value.trim(); if(!award||!name) return;
     const key = Date.now().toString(36)+Math.random().toString(36).slice(2,6), at=Date.now();
-    const pub = myDoc(state.funPub); pub.push({key,award,at});
-    const pv = myDoc(state.funDocs); pv.push({key,name,speech,at});
+    const pub = myDoc(state.funPub); pub.push({key,award,speech,at});
+    const pv = myDoc(state.funDocs); pv.push({key,name,at});
     write(async()=>{ await put("funAwards",me,{items:pub}); await put("fun",me,{items:pv}); }); e.target.reset();
   });
   $("#funList").addEventListener("submit", e => {
     const f=e.target.closest(".sp-edit"); if(!f) return;
     e.preventDefault();
     const key=f.dataset.key, speech=f.sp.value.trim();
-    const pv = myDoc(state.funDocs).map(x=> x.key===key ? {...x, speech} : x);
+    const pub = myDoc(state.funPub).map(x=> x.key===key ? {...x, speech} : x);
+    const pv = myDoc(state.funDocs).map(x=> { if(x.key!==key) return x; const {speech:_, ...rest}=x; return rest; });
     state.spEdit=null;
-    write(()=>put("fun",me,{items:pv}));
+    write(async()=>{ await put("funAwards",me,{items:pub}); await put("fun",me,{items:pv}); });
   });
   $("#funList").addEventListener("click", e => {
     const sb=e.target.closest("[data-a='spEdit'],[data-a='spCancel']");
