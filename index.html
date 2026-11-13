@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WinningStar 2026 Year-end Party 籌備板</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* Layout: sticky section nav on top, four stacked work sections, one column on phones. */
+:root{
+  --bg:#f3f5f9;
+  --surface:#ffffff;
+  --ink:#16213a;
+  --muted:#5d6782;
+  --line:#dde2ec;
+  --accent:#1d5fa8;
+  --accent-soft:#e3edf9;
+  --gold:#b7791f;
+  --gold-soft:#fbf1df;
+  --danger:#b42318;
+  --font-display:"Noto Sans TC","IBM Plex Sans",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans","Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1524;--surface:#172036;--ink:#e8ecf5;--muted:#9aa4bd;--line:#2a3550;
+    --accent:#7fb2ee;--accent-soft:#1d2e4d;--gold:#e8b45a;--gold-soft:#33291a;--danger:#f97066;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1524;--surface:#172036;--ink:#e8ecf5;--muted:#9aa4bd;--line:#2a3550;
+  --accent:#7fb2ee;--accent-soft:#1d2e4d;--gold:#e8b45a;--gold-soft:#33291a;--danger:#f97066;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.55}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0}
+header.top{background:var(--surface);border-bottom:1px solid var(--line)}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+.hero{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-end;padding:22px 0 16px}
+.hero h1{font-size:28px;font-weight:900;letter-spacing:.01em}
+.hero p{margin:4px 0 0;color:var(--muted)}
+.meeting{display:flex;gap:10px;align-items:center;background:var(--gold-soft);color:var(--ink);border:1px solid color-mix(in srgb,var(--gold) 35%,transparent);padding:8px 12px;border-radius:8px;font-size:14px}
+.meeting b{color:var(--gold)}
+nav.sec{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav.sec .wrap{display:flex;gap:4px;overflow-x:auto}
+nav.sec a{padding:10px 12px;color:var(--muted);text-decoration:none;font-weight:600;white-space:nowrap;border-bottom:2px solid transparent}
+nav.sec a:hover,nav.sec a:focus-visible{color:var(--accent);border-bottom-color:var(--accent);outline:none}
+main{display:grid;gap:28px;padding:24px 0 60px}
+section.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;scroll-margin-top:56px}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:14px}
+.sec-head h2{font-size:20px;font-weight:700}
+.sec-head .hint{color:var(--muted);font-size:13px}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.04em;color:var(--muted);font-weight:600;background:color-mix(in srgb,var(--bg) 60%,var(--surface))}
+td.owner{font-weight:600;color:var(--accent);white-space:nowrap}
+td.time{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--muted);width:80px}
+td.act{white-space:nowrap;text-align:right;width:1%}
+.btn{font:inherit;font-size:13px;font-weight:600;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 11px;cursor:pointer}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.primary:hover{filter:brightness(1.08);color:var(--surface)}
+.btn.link{border:none;background:none;padding:4px 6px;color:var(--muted)}
+.btn.link:hover{color:var(--accent)}
+.btn.link.del:hover{color:var(--danger)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+input,select,textarea{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%}
+textarea{resize:vertical;min-height:60px}
+.form{display:grid;gap:8px;margin-top:14px;padding:14px;border:1px dashed var(--line);border-radius:8px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.row > *{flex:1 1 160px}
+.row > .btn{flex:0 0 auto}
+label.lbl{font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.idea{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:6px;background:var(--surface)}
+.idea h3{font-size:16px;font-weight:700}
+.idea p{margin:0;color:var(--muted);font-size:14px;white-space:pre-wrap}
+.meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.chip.gold{background:var(--gold-soft);color:var(--gold)}
+.chip.grey{background:color-mix(in srgb,var(--muted) 15%,transparent);color:var(--muted)}
+.vote{display:inline-flex;align-items:center;gap:5px}
+.vote.on{border-color:var(--gold);color:var(--gold);background:var(--gold-soft)}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters .btn.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.cat{border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;padding:14px;display:grid;gap:10px}
+.cat-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.cat h3{font-size:17px}
+.cat .desc{color:var(--muted);font-size:13px;margin:2px 0 0}
+.noms{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.noms li{display:flex;gap:8px;justify-content:space-between;align-items:flex-start;background:var(--bg);border-radius:6px;padding:7px 10px;font-size:14px}
+.noms .who{font-weight:700}
+.noms .why{color:var(--muted)}
+.empty{color:var(--muted);font-size:14px;padding:12px;border:1px dashed var(--line);border-radius:8px;text-align:center}
+.banner{display:none;margin:12px 0 0;padding:9px 12px;border-radius:8px;font-size:13px;background:var(--gold-soft);color:var(--ink);border:1px solid color-mix(in srgb,var(--gold) 35%,transparent)}
+.banner.show{display:block}
+.me{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.me input{width:150px;padding:5px 8px}
+details summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:13px}
+.edit-in input,.edit-in textarea{padding:5px 7px}
+.summary{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.summary .todo{color:var(--danger);font-size:13px;align-self:center}
+.mgr-row{display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:start;padding:6px 0;border-top:1px solid var(--line)}
+.mgr-row:first-of-type{border-top:none}
+.mgr-name{font-weight:700;color:var(--accent);font-size:14px;padding-top:4px}
+.people{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pchip{display:inline-flex;align-items:center;gap:2px;background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:2px 4px 2px 10px;font-size:14px}
+.pchip button{border:none;background:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 4px;border-radius:99px}
+.pchip button:hover{color:var(--danger)}
+.padd{display:flex;gap:4px;flex:1 1 150px;min-width:150px}
+.padd input{padding:4px 8px;font-size:13px}
+.padd .btn{padding:4px 9px}
+.cat .count{font-size:12px;color:var(--muted);font-weight:600;margin-left:6px}
+.lock{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--gold);background:var(--gold-soft);padding:3px 10px;border-radius:99px}
+.fun-list{display:grid;gap:6px;margin:12px 0 0;padding:0;list-style:none}
+.fun-list li{display:flex;justify-content:space-between;gap:8px;background:var(--bg);border-radius:6px;padding:8px 12px;font-size:14px}
+.fun-list .award{font-weight:700}
+@media (max-width:520px){.mgr-row{grid-template-columns:1fr}}
+@media (max-width:520px){.hero h1{font-size:23px}section.card{padding:14px}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+.gate{position:fixed;inset:0;z-index:50;background:color-mix(in srgb,var(--bg) 96%,transparent);display:flex;align-items:center;justify-content:center;padding:20px}
+.gate.hide{display:none}
+.gate form{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px;display:grid;gap:12px;width:min(360px,100%)}
+.gate h2{font-size:20px}
+.gate p{margin:0;color:var(--muted);font-size:14px}
+.gate .err{color:var(--danger);font-size:13px;min-height:1em}
+</style>
+</head>
+<body>
+<div class="gate" id="gate"><form id="gateForm">
+  <h2>WinningStar 2026 Year-end Party 籌備板</h2>
+  <p>請輸入團隊密碼和你的英文名字。</p>
+  <div><label class="lbl" for="gatePw">團隊密碼</label><input id="gatePw" type="password" required autocomplete="off"></div>
+  <div><label class="lbl" for="gateName">我的名字（英文）</label><input id="gateName" required placeholder="例如 Vickie" autocomplete="off"></div>
+  <div class="err" id="gateErr"></div>
+  <button class="btn primary" type="submit">進入</button>
+</form></div>
+<header class="top">
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1>WinningStar 2026 Year-end Party 籌備板</h1>
+        <p>派對日期：<b>12/12（六）</b>　分工、議程、節目提議與 Recognition 名單，大家一起看、一起填。</p>
+      </div>
+      <div class="meeting" id="meeting"><span>下次開會</span><b id="meetingText">每週五 早上 9:00</b></div>
+    </div>
+    <div class="me"><label for="myName">我的名字（英文）</label><input id="myName" placeholder="例如 Vickie" autocomplete="off"></div>
+    <div class="banner" id="banner"></div>
+    <div style="height:14px"></div>
+  </div>
+</header>
+<nav class="sec" aria-label="區塊">
+  <div class="wrap">
+    <a href="#owners">分工負責</a>
+    <a href="#agenda">議程</a>
+    <a href="#ideas">遊戲與節目提議</a>
+    <a href="#recog">Recognition</a>
+    <a href="#fun">紙盤子趣味獎</a>
+  </div>
+</nav>
+
+<div class="wrap">
+<main>
+  <!-- OWNERS -->
+  <section class="card" id="owners">
+    <div class="sec-head"><h2>分工負責</h2><span class="hint">點「編輯」可修改負責人或備註</span></div>
+    <div class="tbl"><table>
+      <thead><tr><th>項目</th><th>負責人</th><th>主要任務／備註</th><th></th></tr></thead>
+      <tbody id="ownersBody"><tr><td colspan="4" class="empty">載入中…</td></tr></tbody>
+    </table></div>
+    <details class="form-wrap writer" style="margin-top:12px">
+      <summary>新增一個項目</summary>
+      <form class="form" id="ownerForm">
+        <div class="row">
+          <div><label class="lbl" for="oSec">項目</label><input id="oSec" required></div>
+          <div><label class="lbl" for="oOwner">負責人</label><input id="oOwner" required></div>
+        </div>
+        <div><label class="lbl" for="oNote">主要任務／備註</label><textarea id="oNote"></textarea></div>
+        <div><button class="btn primary" type="submit">新增</button></div>
+      </form>
+    </details>
+  </section>
+
+  <!-- AGENDA -->
+  <section class="card" id="agenda">
+    <div class="sec-head"><h2>議程</h2><span class="hint">由 Ting 與 Katrina 整理；可逐條新增，或整份貼上</span></div>
+    <div class="tbl"><table>
+      <thead><tr><th>時間</th><th>節目</th><th>負責人／主持</th><th>備註</th><th></th></tr></thead>
+      <tbody id="agendaBody"><tr><td colspan="5" class="empty">載入中…</td></tr></tbody>
+    </table></div>
+    <div class="writer">
+      <form class="form" id="agendaForm">
+        <div class="row">
+          <div style="flex:0 1 110px"><label class="lbl" for="aTime">時間</label><input id="aTime" placeholder="18:30"></div>
+          <div><label class="lbl" for="aItem">節目</label><input id="aItem" required></div>
+          <div><label class="lbl" for="aWho">負責人／主持</label><input id="aWho"></div>
+          <div><label class="lbl" for="aNote">備註</label><input id="aNote"></div>
+          <button class="btn primary" type="submit" style="align-self:end">加到議程</button>
+        </div>
+      </form>
+      <details style="margin-top:10px">
+        <summary>整份貼上議程（會取代目前的議程）</summary>
+        <form class="form" id="agendaBulk">
+          <label class="lbl" for="bulkText">每行一項，用「|」分隔：時間 | 節目 | 負責人 | 備註</label>
+          <textarea id="bulkText" rows="7" placeholder="18:00 | 入場報到 | Theresa | &#10;18:30 | WFG 形象影片 |  | 約 3 分鐘&#10;18:35 | WFG 介紹 | Vickie | 5–10 分鐘"></textarea>
+          <label class="lbl" for="bulkFile">或上傳 .txt / .csv 檔（同樣格式，CSV 用逗號分隔）</label>
+          <input type="file" id="bulkFile" accept=".txt,.csv,text/plain,text/csv">
+          <div><button class="btn primary" type="submit">取代議程</button></div>
+        </form>
+      </details>
+    </div>
+  </section>
+
+  <!-- IDEAS -->
+  <section class="card" id="ideas">
+    <div class="sec-head"><h2>遊戲與節目提議</h2>
+      <div class="filters" id="ideaFilters" role="group" aria-label="篩選">
+        <button class="btn on" data-k="all" type="button">全部</button>
+        <button class="btn" data-k="遊戲" type="button">遊戲</button>
+        <button class="btn" data-k="節目" type="button">節目／表演</button>
+        <button class="btn" data-k="其他" type="button">其他</button>
+      </div>
+    </div>
+    <div class="grid2" id="ideaList"><div class="empty">載入中…</div></div>
+    <form class="form writer" id="ideaForm">
+      <div class="row">
+        <div style="flex:0 1 150px"><label class="lbl" for="iKind">類型</label>
+          <select id="iKind"><option>遊戲</option><option value="節目">節目／表演</option><option>其他</option></select></div>
+        <div><label class="lbl" for="iTitle">提議名稱</label><input id="iTitle" required placeholder="例如：猜猜我是誰"></div>
+        <div style="flex:0 1 170px"><label class="lbl" for="iOwner">誰來負責（可留空）</label><input id="iOwner"></div>
+      </div>
+      <div><label class="lbl" for="iDesc">怎麼玩／內容說明</label><textarea id="iDesc"></textarea></div>
+      <div><button class="btn primary" type="submit">送出提議</button></div>
+    </form>
+  </section>
+
+  <!-- RECOGNITION -->
+  <section class="card" id="recog">
+    <div class="sec-head"><h2>Recognition</h2>
+      <div class="filters" id="recView" role="group" aria-label="檢視方式">
+        <button class="btn on" data-v="cat" type="button">按類別看</button>
+        <button class="btn" data-v="mgr" type="button">按經理看</button>
+      </div>
+    </div>
+    <p class="hint" style="margin:-6px 0 12px;color:var(--muted);font-size:13px">各 SMD 填今年符合資格<b>且會出席</b>的團隊成員，一次可填多個名字，用逗號分開。名單可更新到 <b>12/10</b>。類別大家都能新增，Jean 負責檢查還缺哪些；年資、長期成就、團隊貢獻等類別仍待定。</p>
+    <div class="summary" id="recSummary"></div>
+    <div class="filters" id="recMgrTabs" role="group" aria-label="經理" style="margin:0 0 12px"></div>
+    <div class="grid2" id="recBody"><div class="empty">載入中…</div></div>
+    <form class="form writer" id="recCatForm">
+      <div class="row">
+        <div><label class="lbl" for="rcName">新增類別</label><input id="rcName" required placeholder="例如：Top Recruiter"></div>
+        <button class="btn primary" type="submit" style="align-self:end">新增類別</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- FUN AWARDS (private) -->
+  <section class="card" id="fun">
+    <div class="sec-head"><h2>紙盤子趣味獎</h2><span class="lock">🔒 只有你自己和 Xiaojun 看得到你填的內容</span></div>
+    <p class="hint" style="margin:-6px 0 0;color:var(--muted);font-size:13px">想一個好笑的獎項名稱，寫上要頒給誰。例如「永遠穿那件綠外套獎」。</p>
+    <form class="form writer" id="funForm">
+      <div class="row">
+        <div><label class="lbl" for="fAward">獎項名稱</label><input id="fAward" required></div>
+        <div><label class="lbl" for="fName">頒給誰</label><input id="fName" required></div>
+        <button class="btn primary" type="submit" style="align-self:end">送出</button>
+      </div>
+    </form>
+    <div class="meta" style="margin-top:12px;justify-content:space-between"><span id="funHead"></span><button class="btn link" id="adminBtn" type="button">管理者登入</button></div>
+    <ul class="fun-list" id="funList"></ul>
+  </section>
+</main>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, getDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// ====== 設定 ======
+const TEAM_PASSWORD = "VickieCEO";
+const REQUIRE_PASSWORD = false; // 改成 true 就會重新要求輸入密碼
+const MANAGERS = ["Vickie","Ting","Shufang","Theresa","Katrina","Jean"];
+// ==================
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFTVOFi_JpwGDA6VZXjvgAO8NJwFrJ7Co",
+  authDomain: "year-end-party-d5612.firebaseapp.com",
+  projectId: "year-end-party-d5612",
+  storageBucket: "year-end-party-d5612.firebasestorage.app",
+  messagingSenderId: "985980744451",
+  appId: "1:985980744451:web:b6d6b78e1d92f5e7dbaf36"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const state = { owners:[], agenda:[], ideas:[], votes:[], recCats:[], recPeople:[], funDocs:[], filter:"all", editing:null, recView:"cat", recMgr:null };
+const canWrite = true;
+let me = null, isAdmin = false, funUnsub = null, started = false;
+
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+};
+state.recMgr = store.get("wfgRecMgr");
+if(!MANAGERS.includes(state.recMgr)) state.recMgr = MANAGERS[0];
+
+const nameInput = $("#myName");
+nameInput.value = store.get("wfgPartyName") || "";
+nameInput.addEventListener("change", () => store.set("wfgPartyName", nameInput.value.trim()));
+const myName = () => nameInput.value.trim();
+
+function banner(msg){ const b=$("#banner"); if(!msg){b.classList.remove("show");return;} b.textContent=msg; b.classList.add("show"); }
+
+const add = (c, d) => addDoc(collection(db, c), d);
+const upd = (c, id, d) => updateDoc(doc(db, c, id), d);
+const del = (c, id) => deleteDoc(doc(db, c, id));
+const put = (c, id, d) => setDoc(doc(db, c, id), d);
+
+async function write(fn){
+  if(!me){ banner("還在連線中，請稍等幾秒再試。"); return; }
+  try { await fn(); banner(""); }
+  catch(e){ console.error(e); banner("儲存失敗，請檢查網路後再試一次。"); }
+}
+const sure = (what) => window.confirm(`確定要刪除「${what}」嗎？`);
+
+// ---------- RENDER ----------
+function renderOwners(){
+  const tb = $("#ownersBody");
+  if(!state.owners.length){ tb.innerHTML = `<tr><td colspan="4" class="empty">還沒有分工項目</td></tr>`; return; }
+  tb.innerHTML = state.owners.map(o => {
+    const d = o.d;
+    if(state.editing === "o:"+o.id){
+      return `<tr class="edit-in" data-id="${o.id}">
+        <td><input data-f="section" value="${esc(d.section)}" aria-label="項目"></td>
+        <td><input data-f="owner" value="${esc(d.owner)}" aria-label="負責人"></td>
+        <td><textarea data-f="note" aria-label="備註">${esc(d.note)}</textarea></td>
+        <td class="act"><button class="btn primary" data-a="saveO" type="button">儲存</button> <button class="btn link" data-a="cancel" type="button">取消</button></td></tr>`;
+    }
+    return `<tr data-id="${o.id}"><td><b>${esc(d.section)}</b></td><td class="owner">${esc(d.owner)}</td><td>${esc(d.note)}</td>
+      <td class="act"><button class="btn link" data-a="editO" type="button">編輯</button><button class="btn link del" data-a="delO" type="button">刪除</button></td></tr>`;
+  }).join("");
+}
+
+function renderAgenda(){
+  const tb = $("#agendaBody");
+  if(!state.agenda.length){ tb.innerHTML = `<tr><td colspan="5" class="empty">議程還沒上傳，Ting 可以在下方新增或整份貼上</td></tr>`; return; }
+  tb.innerHTML = state.agenda.map((a,i) => {
+    const d = a.d;
+    if(state.editing === "a:"+a.id){
+      return `<tr class="edit-in" data-id="${a.id}">
+        <td><input data-f="time" value="${esc(d.time)}" aria-label="時間"></td>
+        <td><input data-f="item" value="${esc(d.item)}" aria-label="節目"></td>
+        <td><input data-f="who" value="${esc(d.who)}" aria-label="負責人"></td>
+        <td><input data-f="note" value="${esc(d.note)}" aria-label="備註"></td>
+        <td class="act"><button class="btn primary" data-a="saveA" type="button">儲存</button> <button class="btn link" data-a="cancel" type="button">取消</button></td></tr>`;
+    }
+    return `<tr data-id="${a.id}"><td class="time">${esc(d.time) || "—"}</td><td><b>${esc(d.item)}</b></td><td class="owner">${esc(d.who)}</td><td>${esc(d.note)}</td>
+      <td class="act"><button class="btn link" data-a="up" type="button" aria-label="上移" ${i===0?"disabled":""}>↑</button><button class="btn link" data-a="down" type="button" aria-label="下移" ${i===state.agenda.length-1?"disabled":""}>↓</button><button class="btn link" data-a="editA" type="button">編輯</button><button class="btn link del" data-a="delA" type="button">刪除</button></td></tr>`;
+  }).join("");
+}
+
+function renderIdeas(){
+  const box = $("#ideaList");
+  const counts = {}; const myVotes = new Set();
+  state.votes.forEach(v => { const d=v.d; counts[d.ideaId]=(counts[d.ideaId]||0)+1; if(d.by===me) myVotes.add(d.ideaId); });
+  let list = state.ideas.filter(x => state.filter==="all" || x.d.kind===state.filter);
+  list = list.slice().sort((a,b) => (counts[b.id]||0)-(counts[a.id]||0) || (b.d.at||0)-(a.d.at||0));
+  if(!list.length){ box.innerHTML = `<div class="empty">還沒有提議，第一個想法就從你開始</div>`; return; }
+  box.innerHTML = list.map(x => {
+    const d=x.d, n=counts[x.id]||0, on=myVotes.has(x.id);
+    const kindCls = d.kind==="遊戲" ? "" : d.kind==="節目" ? "gold" : "grey";
+    const kindLbl = d.kind==="節目" ? "節目／表演" : d.kind;
+    return `<article class="idea" data-id="${x.id}">
+      <div class="meta"><span class="chip ${kindCls}">${esc(kindLbl)}</span>${d.status?`<span class="chip grey">${esc(d.status)}</span>`:""}</div>
+      <h3>${esc(d.title)}</h3>
+      ${d.desc?`<p>${esc(d.desc)}</p>`:""}
+      <div class="meta">${d.owner?`負責：<b style="color:var(--accent)">${esc(d.owner)}</b> · `:""}提議：${esc(d.byName||"—")}</div>
+      <div class="meta" style="justify-content:space-between">
+        <button class="btn vote ${on?"on":""}" data-a="vote" type="button" aria-pressed="${on}">👍 <span>${n}</span></button>
+        <button class="btn link del" data-a="delI" type="button">刪除</button>
+      </div></article>`;
+  }).join("");
+}
+
+function chips(list){
+  return list.map(p=>`<span class="pchip">${esc(p.d.name)}<button type="button" data-a="delP" data-id="${p.id}" aria-label="移除 ${esc(p.d.name)}">✕</button></span>`).join("");
+}
+function addForm(cat, mgr){
+  return `<form class="padd" data-cat="${cat}" data-mgr="${esc(mgr)}"><input name="n" placeholder="+ 人名" aria-label="新增人名"><button class="btn" type="submit">加</button></form>`;
+}
+function renderRec(){
+  const cats = state.recCats, ppl = state.recPeople;
+  const of = (c,m) => ppl.filter(p=>p.d.catId===c && p.d.manager===m).sort((x,y)=>(x.d.at||0)-(y.d.at||0));
+  const missing = MANAGERS.filter(m=>!ppl.some(p=>p.d.manager===m));
+  $("#recSummary").innerHTML = cats.map(c=>`<span class="chip">${esc(c.d.name)}：${ppl.filter(p=>p.d.catId===c.id).length} 人</span>`).join("")
+    + (cats.length && missing.length ? `<span class="todo">還沒填：${missing.map(esc).join("、")}</span>` : "");
+  const tabs = $("#recMgrTabs");
+  tabs.style.display = state.recView==="mgr" ? "" : "none";
+  tabs.innerHTML = MANAGERS.map(m=>`<button class="btn ${m===state.recMgr?"on":""}" data-m="${esc(m)}" type="button">${esc(m)}</button>`).join("");
+  const box = $("#recBody");
+  if(!cats.length){ box.innerHTML = `<div class="empty">還沒有類別，請在下方新增。</div>`; return; }
+  if(state.recView==="cat"){
+    box.innerHTML = cats.map(c=>{
+      const n = ppl.filter(p=>p.d.catId===c.id).length;
+      return `<div class="cat" data-id="${c.id}">
+        <div class="cat-head"><h3>${esc(c.d.name)}<span class="count">${n} 人</span></h3><button class="btn link del" data-a="delRC" type="button">刪除類別</button></div>
+        <div>${MANAGERS.map(m=>`<div class="mgr-row"><div class="mgr-name">${esc(m)}</div><div class="people">${chips(of(c.id,m))}${addForm(c.id,m)}</div></div>`).join("")}</div>
+      </div>`;
+    }).join("");
+  } else {
+    const m = state.recMgr;
+    box.innerHTML = cats.map(c=>`<div class="cat" data-id="${c.id}">
+        <div class="cat-head"><h3>${esc(c.d.name)}<span class="count">${of(c.id,m).length} 人</span></h3></div>
+        <div class="people">${chips(of(c.id,m))}${addForm(c.id,m)}</div>
+      </div>`).join("");
+  }
+}
+
+function renderFun(){
+  const list = $("#funList"), head = $("#funHead");
+  let items = [];
+  state.funDocs.forEach(d => (d.d.items||[]).forEach((it,i)=>items.push({...it, owner:d.id, idx:i, byName:d.d.byName})));
+  items.sort((a,b)=>(a.at||0)-(b.at||0));
+  head.textContent = isAdmin ? `管理者模式：看得到所有人填的 ${items.length} 個趣味獎。` : (items.length ? `你填的 ${items.length} 個：` : "");
+  $("#adminBtn").textContent = isAdmin ? "登出管理者" : "管理者登入";
+  if(!items.length){ list.innerHTML = `<li class="empty" style="display:block">${isAdmin?"還沒有人填。":"你還沒填任何趣味獎。"}</li>`; return; }
+  list.innerHTML = items.map(it=>`<li><div><span class="award">${esc(it.award)}</span> → ${esc(it.name)}${isAdmin?`<div class="meta">填寫：${esc(it.byName||"—")}</div>`:""}</div>${(it.owner===me)?`<button class="btn link del" data-a="delF" data-idx="${it.idx}" type="button">刪除</button>`:""}</li>`).join("");
+}
+
+function renderAll(){ renderOwners(); renderAgenda(); renderIdeas(); renderRec(); renderFun(); }
+
+// ---------- EVENTS ----------
+const rowData = (tr) => { const o={}; tr.querySelectorAll("[data-f]").forEach(el=>o[el.dataset.f]=el.value.trim()); return o; };
+
+$("#ownersBody").addEventListener("click", e => {
+  const b = e.target.closest("[data-a]"); if(!b) return;
+  const tr = b.closest("tr"), id = tr.dataset.id, a = b.dataset.a;
+  const row = state.owners.find(x=>x.id===id);
+  if(a==="editO"){ state.editing="o:"+id; renderOwners(); }
+  else if(a==="cancel"){ state.editing=null; renderAll(); }
+  else if(a==="saveO"){ const v=rowData(tr); state.editing=null; write(()=>upd("owners",id,v)); renderOwners(); }
+  else if(a==="delO"){ if(sure(row?.d.section||"")) write(()=>del("owners",id)); }
+});
+
+$("#agendaBody").addEventListener("click", e => {
+  const b = e.target.closest("[data-a]"); if(!b) return;
+  const tr = b.closest("tr"), id = tr.dataset.id, a = b.dataset.a;
+  const idx = state.agenda.findIndex(x=>x.id===id);
+  if(a==="editA"){ state.editing="a:"+id; renderAgenda(); }
+  else if(a==="cancel"){ state.editing=null; renderAll(); }
+  else if(a==="saveA"){ const v=rowData(tr); state.editing=null; write(()=>upd("agenda",id,v)); renderAgenda(); }
+  else if(a==="delA"){ if(sure(state.agenda[idx]?.d.item||"")) write(()=>del("agenda",id)); }
+  else if(a==="up"||a==="down"){
+    const j = a==="up" ? idx-1 : idx+1; if(j<0||j>=state.agenda.length) return;
+    const A=state.agenda[idx], B=state.agenda[j];
+    write(async()=>{ await upd("agenda",A.id,{order:B.d.order}); await upd("agenda",B.id,{order:A.d.order}); });
+  }
+});
+
+$("#ownerForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const v={section:$("#oSec").value.trim(),owner:$("#oOwner").value.trim(),note:$("#oNote").value.trim(),order:Date.now(),by:me};
+  if(!v.section||!v.owner) return;
+  write(()=>add("owners",v)); e.target.reset();
+});
+
+$("#agendaForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const v={time:$("#aTime").value.trim(),item:$("#aItem").value.trim(),who:$("#aWho").value.trim(),note:$("#aNote").value.trim(),order:Date.now(),by:me};
+  if(!v.item) return;
+  write(()=>add("agenda",v)); e.target.reset(); $("#aTime").focus();
+});
+
+$("#bulkFile").addEventListener("change", async e => {
+  const f = e.target.files[0]; if(!f) return;
+  const txt = await f.text();
+  $("#bulkText").value = /\.csv$/i.test(f.name) ? txt.split(/\r?\n/).map(l=>l.split(",").join(" | ")).join("\n") : txt;
+});
+
+$("#agendaBulk").addEventListener("submit", e => {
+  e.preventDefault();
+  const lines = $("#bulkText").value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  if(!lines.length) return;
+  if(!window.confirm("這會取代目前整份議程，確定嗎？")) return;
+  const base = Date.now();
+  const rows = lines.map((l,i)=>{ const p=l.split("|").map(s=>s.trim()); return {time:p[0]||"",item:p[1]||p[0]||"",who:p[2]||"",note:p.slice(3).join(" | "),order:base+i,by:me}; });
+  const old = state.agenda.slice();
+  write(async()=>{
+    for(const a of old){ await del("agenda",a.id); }
+    for(const r of rows){ await add("agenda",r); }
+  });
+  $("#bulkText").value=""; $("#bulkFile").value="";
+  e.target.closest("details").open=false;
+});
+
+$("#ideaFilters").addEventListener("click", e => {
+  const b=e.target.closest("[data-k]"); if(!b) return;
+  state.filter=b.dataset.k;
+  document.querySelectorAll("#ideaFilters .btn").forEach(x=>x.classList.toggle("on",x===b));
+  renderIdeas();
+});
+
+$("#ideaForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const v={kind:$("#iKind").value,title:$("#iTitle").value.trim(),desc:$("#iDesc").value.trim(),owner:$("#iOwner").value.trim(),byName:myName(),by:me,at:Date.now()};
+  if(!v.title) return;
+  if(!v.byName){ nameInput.focus(); banner("請先在上方填上你的名字，大家才知道是誰提議的。"); return; }
+  write(()=>add("ideas",v)); e.target.reset();
+});
+
+$("#ideaList").addEventListener("click", e => {
+  const b=e.target.closest("[data-a]"); if(!b) return;
+  const id=b.closest(".idea").dataset.id;
+  if(b.dataset.a==="vote"){
+    const vid = id+"__"+me;
+    const has = state.votes.some(v=>v.id===vid);
+    write(()=> has ? del("votes",vid) : put("votes",vid,{ideaId:id,by:me}));
+  } else if(b.dataset.a==="delI"){
+    const it = state.ideas.find(x=>x.id===id);
+    if(!sure(it?.d.title||"")) return;
+    const vs = state.votes.filter(v=>v.d.ideaId===id);
+    write(async()=>{ for(const v of vs) await del("votes",v.id); await del("ideas",id); });
+  }
+});
+
+$("#recView").addEventListener("click", e => {
+  const b=e.target.closest("[data-v]"); if(!b) return;
+  state.recView=b.dataset.v;
+  document.querySelectorAll("#recView .btn").forEach(x=>x.classList.toggle("on",x===b));
+  renderRec();
+});
+$("#recMgrTabs").addEventListener("click", e => {
+  const b=e.target.closest("[data-m]"); if(!b) return;
+  state.recMgr=b.dataset.m; store.set("wfgRecMgr", state.recMgr);
+  renderRec();
+});
+$("#recBody").addEventListener("submit", e => {
+  const f=e.target.closest(".padd"); if(!f) return;
+  e.preventDefault();
+  const names=f.n.value.split(/[,，、\n]/).map(x=>x.trim()).filter(Boolean);
+  if(!names.length) return;
+  const cat=f.dataset.cat, mgr=f.dataset.mgr, base=Date.now();
+  write(async()=>{ for(const [i,name] of names.entries()) await add("recPeople",{catId:cat,manager:mgr,name,at:base+i,by:me}); });
+  f.reset();
+});
+$("#recBody").addEventListener("click", e => {
+  const b=e.target.closest("[data-a]"); if(!b) return;
+  if(b.dataset.a==="delP"){ write(()=>del("recPeople",b.dataset.id)); }
+  else if(b.dataset.a==="delRC"){
+    const id=b.closest(".cat").dataset.id;
+    const c=state.recCats.find(x=>x.id===id);
+    if(!sure(c?.d.name||"")) return;
+    const ps=state.recPeople.filter(p=>p.d.catId===id);
+    write(async()=>{ for(const p of ps) await del("recPeople",p.id); await del("recCats",id); });
+  }
+});
+$("#recCatForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const name=$("#rcName").value.trim(); if(!name) return;
+  write(()=>add("recCats",{name,order:Date.now(),by:me})); e.target.reset();
+});
+
+function myFun(){ return state.funDocs.find(d=>d.id===me); }
+$("#funForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const award=$("#fAward").value.trim(), name=$("#fName").value.trim(); if(!award||!name) return;
+  const cur = myFun(); const items = cur ? (cur.d.items||[]).slice() : [];
+  items.push({award,name,at:Date.now()});
+  write(()=>put("fun",me,{items,byName:myName()||""})); e.target.reset();
+});
+$("#funList").addEventListener("click", e => {
+  const b=e.target.closest("[data-a='delF']"); if(!b) return;
+  const cur=myFun(); if(!cur) return;
+  const items=(cur.d.items||[]).filter((_,i)=>i!==Number(b.dataset.idx));
+  write(()=>put("fun",me,{items,byName:cur.d.byName||myName()||""}));
+});
+$("#adminBtn").addEventListener("click", async () => {
+  try {
+    if(isAdmin){ await signOut(auth); return; }
+    await signInWithPopup(auth, new GoogleAuthProvider());
+  } catch(e){ console.error(e); banner("登入沒有完成，請再試一次。"); }
+});
+
+// ---------- FIRST-RUN SEED (只在資料庫是空的時候寫入一次) ----------
+const SEED = {
+ "meta": {
+  "info": {
+   "nextMeeting": "11/20（五）上午 9:00，之後每週五同一時間；11/27 Black Friday 當週時間待確認"
+  }
+ },
+ "owners": {
+  "o01": {
+   "section": "議程／流程表",
+   "owner": "Katrina + Ting",
+   "note": "完成逐段流程表：主持分工、中英文串場、影片播放、致詞人與時長、頒獎／表演／抽獎順序。確認 DJ 的播放需求、費用及付款方式。下次會議帶初稿。",
+   "order": 1
+  },
+  "o11": {
+   "section": "主持",
+   "owner": "Katrina",
+   "note": "擔任當晚主持，和 Ting 一起排節目細節。",
+   "order": 1.5
+  },
+  "o02": {
+   "section": "座位安排／平面圖",
+   "owner": "Ting",
+   "note": "提供桌位圖，確認各團隊與 Provider 的座位，並確認展示桌、麥克風及支架。目前 17 桌，最多約 20 桌。下次會議回報。",
+   "order": 2
+  },
+  "o16": {
+   "section": "邀請人數",
+   "owner": "各團隊",
+   "note": "開始邀約並回報預估人數，讓 Ting 判斷是否需要加桌。下次會議先回報人數。",
+   "order": 2.5
+  },
+  "o15": {
+   "section": "邀請卡",
+   "owner": "Ting",
+   "note": "第一批已印，Ting 已付 $80。確認是否加印。",
+   "order": 2.7
+  },
+  "o14": {
+   "section": "Cocktail 與酒水",
+   "owner": "Vickie",
+   "note": "5:30 PM Cocktail 迎賓：Vickie 負責零食、水果和盛盤；酒已訂，安排搬到辦公室及會場。Ting 跟進 Cocktail 的場地安排。",
+   "order": 2.8
+  },
+  "o03": {
+   "section": "WFG 介紹／簡報",
+   "owner": "Vickie",
+   "note": "開場先播約 3 分鐘 WFG 形象影片，再由 Vickie 出場介紹 SMD，並安排簡短的 WFG 及 Provider 介紹。",
+   "order": 3
+  },
+  "o04": {
+   "section": "Recognition",
+   "owner": "Jean + 各 SMD + Theresa",
+   "note": "Jean 把類別加到 Recognition List，各 SMD 填今年符合資格且會出席的人員。Theresa 協調製作投影片，各 SMD 核對自己團隊的名字及資料。名單可更新至 12/10。年資、長期成就、團隊貢獻等類別待定。",
+   "order": 4
+  },
+  "o12": {
+   "section": "場地佈置",
+   "owner": "Jean + 佈置團隊",
+   "note": "拿到桌位圖後，確認動線、Winning Star／WFG 標誌懸掛或投影，以及是否需要氣球。Photo Booth 已取消。",
+   "order": 4.5
+  },
+  "o13": {
+   "section": "拍照",
+   "owner": "Nikki",
+   "note": "",
+   "order": 4.7
+  },
+  "o05": {
+   "section": "遊戲：Bingo",
+   "owner": "Xiuwei (修維) + Shufang",
+   "note": "確認 Bingo 規則和所需物品，回報 Katrina、Ting 納入流程表。",
+   "order": 5
+  },
+  "o06": {
+   "section": "遊戲：最佳服裝",
+   "owner": "Amber",
+   "note": "跟進玫瑰投票及主持安排（在附近花店買玫瑰，不用 Costco 配送）。回報 Katrina、Ting 納入流程表。",
+   "order": 6
+  },
+  "o07": {
+   "section": "樂團表演",
+   "owner": "Lisa",
+   "note": "確認樂團表演的人員、長度和設備需求，回報 Katrina、Ting 納入流程表。卡拉 OK 排最後，由專業 DJ 支援。",
+   "order": 7
+  },
+  "o08": {
+   "section": "Provider 贊助與獎品",
+   "owner": "Theresa + Zhijie",
+   "note": "Theresa 跟進 Nationwide、Transamerica、Pacific Life、AMS；Zhijie 跟進 Allianz。逐家確認贊助金額、獎品品項與份數、出席人數、是否需要展示桌、是否安排致詞。Transamerica 提到的 $500 尚待確認，AMS 的金額及獎品待定。下次會議前回報。",
+   "order": 8
+  },
+  "o09": {
+   "section": "支票抬頭與獎品缺口",
+   "owner": "Ting + Theresa",
+   "note": "Ting 確認支票抬頭並回覆 AMS 的 Daryl，同時確認贊助方可直接支付哪些費用。Theresa 彙整已確認獎品及缺口，讓 Vickie 安排補買。抽獎籌備表列 50 份獎品。禮券與贊助品以 11 月底前收齊為目標。",
+   "order": 9
+  },
+  "o17": {
+   "section": "Business owner 推廣",
+   "owner": "全體成員",
+   "note": "邀請做生意的客人，可提供禮券抽獎，帶傳單或立式 banner 放在 provider 桌。截止日：11 月底。",
+   "order": 9.5
+  },
+  "o10": {
+   "section": "重發電子版 flyer",
+   "owner": "Ting",
+   "note": "請團隊在群組重發電子版 flyer（原連結已過期）。",
+   "order": 10
+  }
+ },
+ "agenda": {
+  "a01": {
+   "time": "5:30 PM",
+   "item": "Cocktail 迎賓",
+   "who": "Vickie",
+   "note": "零食、水果和盛盤；酒已訂",
+   "order": 1
+  },
+  "a02": {
+   "time": "6:00 PM",
+   "item": "開場：WFG 形象影片",
+   "who": "Katrina（主持）",
+   "note": "約 3 分鐘",
+   "order": 2
+  },
+  "a03": {
+   "time": "",
+   "item": "Vickie 出場、介紹 SMD",
+   "who": "Vickie",
+   "note": "SMD 穿正式服裝上台",
+   "order": 3
+  },
+  "a04": {
+   "time": "",
+   "item": "WFG 及 Provider 簡短介紹",
+   "who": "",
+   "note": "",
+   "order": 4
+  },
+  "a05": {
+   "time": "6:30 PM",
+   "item": "上菜",
+   "who": "",
+   "note": "以下節目順序待 Katrina、Ting 排定",
+   "order": 5
+  },
+  "a06": {
+   "time": "",
+   "item": "Recognition",
+   "who": "Jean",
+   "note": "",
+   "order": 6
+  },
+  "a07": {
+   "time": "",
+   "item": "Bingo",
+   "who": "Xiuwei + Shufang",
+   "note": "",
+   "order": 7
+  },
+  "a08": {
+   "time": "",
+   "item": "最佳服裝",
+   "who": "Amber",
+   "note": "玫瑰投票",
+   "order": 8
+  },
+  "a09": {
+   "time": "",
+   "item": "樂團表演",
+   "who": "Lisa",
+   "note": "",
+   "order": 9
+  },
+  "a10": {
+   "time": "",
+   "item": "抽獎",
+   "who": "",
+   "note": "籌備表列 50 份獎品",
+   "order": 10
+  },
+  "a11": {
+   "time": "",
+   "item": "卡拉 OK",
+   "who": "DJ",
+   "note": "排最後，由專業 DJ 支援",
+   "order": 11
+  },
+  "a12": {
+   "time": "10:00 PM",
+   "item": "活動結束",
+   "who": "",
+   "note": "",
+   "order": 12
+  }
+ },
+ "ideas": {
+  "i01": {
+   "kind": "遊戲",
+   "title": "Bingo",
+   "desc": "",
+   "owner": "Xiuwei + Shufang",
+   "status": "已確定",
+   "byName": "11/12 會議",
+   "at": 1
+  },
+  "i02": {
+   "kind": "遊戲",
+   "title": "最佳服裝",
+   "desc": "穿得好看的站一排，小朋友拿玫瑰送給喜歡的人，拿最多玫瑰的贏。每桌 1–2 支玫瑰。",
+   "owner": "Amber",
+   "status": "已確定",
+   "byName": "11/12 會議",
+   "at": 2
+  },
+  "i03": {
+   "kind": "節目",
+   "title": "樂團表演",
+   "desc": "Lisa 團隊的樂團表演，其他團隊或小朋友也歡迎上台。",
+   "owner": "Lisa",
+   "status": "已確定",
+   "byName": "11/12 會議",
+   "at": 3
+  }
+ },
+ "recCats": {
+  "r1": {
+   "name": "MD promotion",
+   "order": 1
+  },
+  "r2": {
+   "name": "SA promotion",
+   "order": 2
+  },
+  "r3": {
+   "name": "A promotion",
+   "order": 3
+  },
+  "r4": {
+   "name": "1st $1000 check",
+   "order": 4
+  }
+ }
+};
+async function seedIfEmpty(){
+  try {
+    const flag = await getDoc(doc(db,"meta","seeded"));
+    if(flag.exists()) return;
+    await put("meta","seeded",{at:Date.now()});
+    for(const [c, docs] of Object.entries(SEED)){
+      for(const [id, d] of Object.entries(docs)) await put(c, id, d);
+    }
+  } catch(e){ console.error(e); }
+}
+
+// ---------- DATA ----------
+const toList = snap => snap.docs.map(d=>({id:d.id,d:d.data()||{}}));
+function watchFun(){
+  if(funUnsub){ funUnsub(); funUnsub=null; }
+  state.funDocs = []; renderFun();
+  if(isAdmin){
+    funUnsub = onSnapshot(collection(db,"fun"), s=>{state.funDocs=toList(s);renderFun();}, e=>{
+      console.error(e); isAdmin=false; banner("這個 Google 帳號不是管理者，只能看到自己填的。"); watchFun();
+    });
+  } else {
+    funUnsub = onSnapshot(doc(db,"fun",me), s=>{state.funDocs = s.exists() ? [{id:s.id,d:s.data()}] : [];renderFun();}, e=>console.error(e));
+  }
+}
+function startData(){
+  let pending = 6;
+  const timer = setTimeout(()=>{ if(pending>0) banner("資料還沒載入完成，可能是網路較慢，畫面上的內容可能不是最新的。"); }, 10000);
+  const done = (s) => { if(!s.metadata.fromCache && pending>0){ pending--; if(pending===0){ clearTimeout(timer); } } };
+  const err = (e) => { console.error(e); clearTimeout(timer); banner("讀取資料時出錯，請重新整理頁面。如果一直出現，請檢查 Firestore 的規則和 Authentication 有沒有設定好。"); };
+  onSnapshot(query(collection(db,"owners"),orderBy("order")), s=>{state.owners=toList(s);done(s);if(!state.editing)renderOwners();}, err);
+  onSnapshot(query(collection(db,"agenda"),orderBy("order")), s=>{state.agenda=toList(s);done(s);if(!state.editing)renderAgenda();}, err);
+  onSnapshot(collection(db,"ideas"), s=>{state.ideas=toList(s);done(s);renderIdeas();}, err);
+  onSnapshot(collection(db,"votes"), s=>{state.votes=toList(s);done(s);renderIdeas();}, err);
+  onSnapshot(query(collection(db,"recCats"),orderBy("order")), s=>{state.recCats=toList(s);done(s);renderRec();}, err);
+  onSnapshot(collection(db,"recPeople"), s=>{state.recPeople=toList(s);done(s);renderRec();}, err);
+  onSnapshot(doc(db,"meta","info"), s=>{ if(s.exists() && s.data().nextMeeting) $("#meetingText").textContent=s.data().nextMeeting; }, ()=>{});
+  seedIfEmpty();
+}
+
+function start(){
+  renderAll();
+  onAuthStateChanged(auth, user => {
+    if(!user){ signInAnonymously(auth).catch(e=>{ console.error(e); banner("無法連線登入，請確認 Firebase 已開啟「匿名登入」。"); }); return; }
+    me = user.uid;
+    isAdmin = !user.isAnonymous;
+    if(!started){ started = true; startData(); }
+    watchFun(); renderIdeas();
+  });
+}
+
+// ---------- PASSWORD GATE ----------
+const gate = $("#gate");
+$("#gateName").value = myName();
+if(!REQUIRE_PASSWORD || (store.get("wfgPartyOk") === TEAM_PASSWORD && myName())){ gate.classList.add("hide"); start(); }
+else { $("#gatePw").focus(); }
+$("#gateForm").addEventListener("submit", e => {
+  e.preventDefault();
+  if($("#gatePw").value.trim() !== TEAM_PASSWORD){ $("#gateErr").textContent = "密碼不對，請再試一次。"; return; }
+  const n = $("#gateName").value.trim(); if(!n) return;
+  nameInput.value = n; store.set("wfgPartyName", n); store.set("wfgPartyOk", TEAM_PASSWORD);
+  gate.classList.add("hide"); start();
+});
+</script>
+</body>
+</html>
