@@ -138,6 +138,8 @@ tr.detail td{background:color-mix(in srgb,var(--bg) 55%,var(--surface));padding:
 .fun-list{display:grid;gap:6px;margin:12px 0 0;padding:0;list-style:none}
 .fun-list li{display:flex;justify-content:space-between;gap:8px;background:var(--bg);border-radius:6px;padding:8px 12px;font-size:14px}
 .fun-list .award{font-weight:700}
+.fun-list .speech{margin-top:4px;color:var(--muted);font-size:13px;white-space:pre-wrap;border-left:3px solid var(--gold);padding-left:8px}
+.fun-list .sp-edit{margin-top:6px;display:grid;gap:6px}
 @media (max-width:520px){.mgr-row{grid-template-columns:1fr}}
 @media (max-width:520px){.hero h1{font-size:23px}section.card{padding:14px}}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
@@ -281,14 +283,15 @@ html{scroll-behavior:smooth}
 
   <!-- FUN AWARDS (private) -->
   <section class="card" id="fun">
-    <div class="sec-head"><h2>紙盤子趣味獎</h2><span class="lock">🔒 獎項名稱大家都看得到；頒給誰只有你自己看得到；不會顯示是誰填的</span></div>
+    <div class="sec-head"><h2>紙盤子趣味獎</h2><span class="lock">🔒 獎項名稱大家都看得到；頒給誰和頒獎詞只有你自己看得到；不會顯示是誰填的</span></div>
     <p class="hint" style="margin:-6px 0 0;color:var(--muted);font-size:13px">想一個好笑的獎項名稱，寫上要頒給誰。看看大家想到的獎項找靈感，一個人可以填好幾個！</p>
     <form class="form writer" id="funForm">
       <div class="row">
         <div><label class="lbl" for="fAward">獎項名稱</label><input id="fAward" required></div>
         <div><label class="lbl" for="fName">頒給誰</label><input id="fName" required></div>
-        <button class="btn primary" type="submit" style="align-self:end">送出</button>
       </div>
+      <div><label class="lbl" for="fSpeech">頒獎詞（可留空，之後也能補）</label><textarea id="fSpeech" rows="2" placeholder="例如：不管客戶多急，中午 12 點一到，他一定準時「下線」！"></textarea></div>
+      <div><button class="btn primary" type="submit">送出</button></div>
     </form>
     <div class="meta" style="margin-top:12px;justify-content:space-between"><span id="funHead"></span><button class="btn link" id="adminBtn" type="button">管理者登入</button></div>
     <ul class="fun-list" id="funList"></ul>
@@ -468,16 +471,19 @@ function renderFun(){
     $("#adminBtn").textContent = isAdmin ? "登出管理者" : "管理者登入";
     const list = $("#funList"), head = $("#funHead");
     const priv = {};
-    state.funDocs.forEach(d => (d.d.items||[]).forEach(it => { if(it.key) priv[it.key] = it.name; }));
+    state.funDocs.forEach(d => (d.d.items||[]).forEach(it => { if(it.key) priv[it.key] = it; }));
     let items = [];
     state.funPub.forEach(d => (d.d.items||[]).forEach(it => items.push({...it, mine: d.id===me})));
     items.sort((a,b)=>(a.at||0)-(b.at||0));
     head.textContent = items.length ? `大家已經想了 ${items.length} 個獎項` + (isAdmin ? "（管理者模式：看得到頒給誰）" : "") : "";
     if(!items.length){ list.innerHTML = `<li class="empty" style="display:block">還沒有人填，第一個獎項就從你開始！</li>`; return; }
     list.innerHTML = items.map(it=>{
-      const who = priv[it.key];
-      const showWho = who && (it.mine || isAdmin);
-      return `<li><div><span class="award">${esc(it.award)}</span>${showWho?` → ${esc(who)}`:""}${it.mine?` <span class="chip grey">你填的</span>`:""}</div>${it.mine?`<button class="btn link del" data-a="delF" data-key="${esc(it.key)}" type="button">刪除</button>`:""}</li>`;
+      const pv = priv[it.key];
+      const see = pv && (it.mine || isAdmin);
+      const editing = state.spEdit===it.key;
+      const sp = see && pv.speech ? `<div class="speech">${esc(pv.speech)}</div>` : "";
+      const ed = editing ? `<form class="sp-edit" data-key="${esc(it.key)}"><textarea name="sp" rows="3" aria-label="頒獎詞">${esc(pv&&pv.speech||"")}</textarea><div><button class="btn primary" type="submit">儲存頒獎詞</button> <button class="btn link" data-a="spCancel" type="button">取消</button></div></form>` : "";
+      return `<li><div style="flex:1"><span class="award">${esc(it.award)}</span>${see?` → ${esc(pv.name)}`:""}${it.mine?` <span class="chip grey">你填的</span>`:""}${editing?ed:sp}</div>${it.mine&&!editing?`<div style="white-space:nowrap"><button class="btn link" data-a="spEdit" data-key="${esc(it.key)}" type="button">${pv&&pv.speech?"改頒獎詞":"加頒獎詞"}</button><button class="btn link del" data-a="delF" data-key="${esc(it.key)}" type="button">刪除</button></div>`:""}</li>`;
     }).join("");
   }
 
@@ -630,13 +636,23 @@ function myDoc(arr){ const d = arr.find(x=>x.id===me); return d ? (d.d.items||[]
   $("#funForm").addEventListener("submit", e => {
     e.preventDefault();
     if(!me){ banner("還在連線中，請稍等幾秒再試。"); return; }
-    const award=$("#fAward").value.trim(), name=$("#fName").value.trim(); if(!award||!name) return;
+    const award=$("#fAward").value.trim(), name=$("#fName").value.trim(), speech=$("#fSpeech").value.trim(); if(!award||!name) return;
     const key = Date.now().toString(36)+Math.random().toString(36).slice(2,6), at=Date.now();
     const pub = myDoc(state.funPub); pub.push({key,award,at});
-    const pv = myDoc(state.funDocs); pv.push({key,name,at});
+    const pv = myDoc(state.funDocs); pv.push({key,name,speech,at});
     write(async()=>{ await put("funAwards",me,{items:pub}); await put("fun",me,{items:pv}); }); e.target.reset();
   });
+  $("#funList").addEventListener("submit", e => {
+    const f=e.target.closest(".sp-edit"); if(!f) return;
+    e.preventDefault();
+    const key=f.dataset.key, speech=f.sp.value.trim();
+    const pv = myDoc(state.funDocs).map(x=> x.key===key ? {...x, speech} : x);
+    state.spEdit=null;
+    write(()=>put("fun",me,{items:pv}));
+  });
   $("#funList").addEventListener("click", e => {
+    const sb=e.target.closest("[data-a='spEdit'],[data-a='spCancel']");
+    if(sb){ state.spEdit = sb.dataset.a==="spEdit" ? sb.dataset.key : null; renderFun(); return; }
     const b=e.target.closest("[data-a='delF']"); if(!b) return;
     const key=b.dataset.key;
     const pub = myDoc(state.funPub).filter(x=>x.key!==key);
