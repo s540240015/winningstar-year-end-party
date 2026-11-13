@@ -106,6 +106,21 @@ label.lbl{font-size:12px;color:var(--muted);font-weight:600;display:block;margin
 .me input{width:150px;padding:5px 8px}
 details summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:13px}
 .edit-in input,.edit-in textarea{padding:5px 7px}
+.status{font:inherit;font-size:12px;font-weight:700;border-radius:99px;padding:3px 10px;border:1px solid transparent;cursor:pointer;white-space:nowrap}
+.status.s0{background:color-mix(in srgb,var(--muted) 14%,transparent);color:var(--muted)}
+.status.s1{background:var(--gold-soft);color:var(--gold);border-color:color-mix(in srgb,var(--gold) 40%,transparent)}
+.status.s2{background:color-mix(in srgb,#1a7f4b 14%,transparent);color:#1a7f4b;border-color:color-mix(in srgb,#1a7f4b 40%,transparent)}
+:root[data-theme="dark"] .status.s2{color:#5fd39a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .status.s2{color:#5fd39a}}
+.prog{font-size:13px;color:var(--muted)}
+.prog b{color:var(--ink)}
+tr.detail td{background:color-mix(in srgb,var(--bg) 55%,var(--surface));padding:12px 14px}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.done-list{list-style:none;margin:6px 0 8px;padding:0;display:grid;gap:4px}
+.done-list li{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+.done-list .ck{color:#1a7f4b;font-weight:700}
+.done-list .dt{color:var(--muted);font-size:12px;white-space:nowrap;margin-left:auto;font-variant-numeric:tabular-nums}
+.ostat{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 12px}
 .summary{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .summary .todo{color:var(--danger);font-size:13px;align-self:center}
 .mgr-row{display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:start;padding:6px 0;border-top:1px solid var(--line)}
@@ -172,10 +187,11 @@ html{scroll-behavior:smooth}
 <main>
   <!-- OWNERS -->
   <section class="card" id="owners">
-    <div class="sec-head"><h2>分工負責</h2><span class="hint">點「編輯」可修改負責人或備註</span></div>
+    <div class="sec-head"><h2>分工負責</h2><span class="hint">點狀態可切換；點「進度」記錄已完成事項和備註</span></div>
+    <div class="ostat" id="ownerStats"></div>
     <div class="tbl"><table>
-      <thead><tr><th>項目</th><th>負責人</th><th>主要任務／備註</th><th></th></tr></thead>
-      <tbody id="ownersBody"><tr><td colspan="4" class="empty">載入中…</td></tr></tbody>
+      <thead><tr><th>項目</th><th>負責人</th><th>主要任務</th><th>狀態</th><th>進度</th><th></th></tr></thead>
+      <tbody id="ownersBody"><tr><td colspan="6" class="empty">載入中…</td></tr></tbody>
     </table></div>
     <details class="form-wrap writer" style="margin-top:12px">
       <summary>新增一個項目</summary>
@@ -184,7 +200,7 @@ html{scroll-behavior:smooth}
           <div><label class="lbl" for="oSec">項目</label><input id="oSec" required></div>
           <div><label class="lbl" for="oOwner">負責人</label><input id="oOwner" required></div>
         </div>
-        <div><label class="lbl" for="oNote">主要任務／備註</label><textarea id="oNote"></textarea></div>
+        <div><label class="lbl" for="oNote">主要任務</label><textarea id="oNote"></textarea></div>
         <div><button class="btn primary" type="submit">新增</button></div>
       </form>
     </details>
@@ -339,18 +355,37 @@ const sure = (what) => window.confirm(`確定要刪除「${what}」嗎？`);
 // ---------- RENDER ----------
 function renderOwners(){
   const tb = $("#ownersBody");
-  if(!state.owners.length){ tb.innerHTML = `<tr><td colspan="4" class="empty">還沒有分工項目</td></tr>`; return; }
+  const ST = ["未開始","進行中","已完成"];
+  const cnt=[0,0,0]; state.owners.forEach(o=>cnt[o.d.status||0]++);
+  $("#ownerStats").innerHTML = state.owners.length ? ST.map((t,i)=>`<span class="status s${i}" style="cursor:default">${t} ${cnt[i]}</span>`).join("") : "";
+  if(!state.owners.length){ tb.innerHTML = `<tr><td colspan="6" class="empty">還沒有分工項目</td></tr>`; return; }
+  const fmt = t => { const d=new Date(t); return (d.getMonth()+1)+"/"+d.getDate(); };
   tb.innerHTML = state.owners.map(o => {
-    const d = o.d;
+    const d = o.d, st = d.status||0, done = d.done||[];
     if(state.editing === "o:"+o.id){
       return `<tr class="edit-in" data-id="${o.id}">
         <td><input data-f="section" value="${esc(d.section)}" aria-label="項目"></td>
         <td><input data-f="owner" value="${esc(d.owner)}" aria-label="負責人"></td>
-        <td><textarea data-f="note" aria-label="備註">${esc(d.note)}</textarea></td>
+        <td colspan="3"><textarea data-f="note" aria-label="主要任務">${esc(d.note)}</textarea></td>
         <td class="act"><button class="btn primary" data-a="saveO" type="button">儲存</button> <button class="btn link" data-a="cancel" type="button">取消</button></td></tr>`;
     }
-    return `<tr data-id="${o.id}"><td><b>${esc(d.section)}</b></td><td class="owner">${esc(d.owner)}</td><td>${esc(d.note)}</td>
-      <td class="act"><button class="btn link" data-a="editO" type="button">編輯</button><button class="btn link del" data-a="delO" type="button">刪除</button></td></tr>`;
+    const open = state.openOwner===o.id;
+    const last = done.length ? done[done.length-1].text : "";
+    let row = `<tr data-id="${o.id}"><td><b>${esc(d.section)}</b></td><td class="owner">${esc(d.owner)}</td><td>${esc(d.note)}</td>
+      <td><button class="status s${st}" data-a="stat" type="button" title="點一下切換狀態">${ST[st]}</button></td>
+      <td class="prog">${done.length?`<b>✓ ${done.length}</b> 項 · ${esc(last)}`:"—"}${d.remark?`<div>📝 ${esc(d.remark)}</div>`:""}</td>
+      <td class="act"><button class="btn link" data-a="prog" type="button" aria-expanded="${open}">${open?"收起":"進度"}</button><button class="btn link" data-a="editO" type="button">編輯</button><button class="btn link del" data-a="delO" type="button">刪除</button></td></tr>`;
+    if(open){
+      row += `<tr class="detail" data-id="${o.id}"><td colspan="6"><div class="detail-grid">
+        <div><label class="lbl">已完成事項</label>
+          ${done.length?`<ul class="done-list">${done.map((x,i)=>`<li><span class="ck">✓</span><span>${esc(x.text)}</span><span class="dt">${fmt(x.at)}</span><button class="btn link del" data-a="delDone" data-i="${i}" type="button" aria-label="刪除這項">✕</button></li>`).join("")}</ul>`:`<div class="prog" style="margin:6px 0 8px">還沒有記錄</div>`}
+          <form class="padd doneForm" data-id="${o.id}"><input name="t" placeholder="例如：已聯絡 Nationwide" aria-label="新增已完成事項"><button class="btn" type="submit">加</button></form></div>
+        <div><label class="lbl" for="rm-${o.id}">備註</label>
+          <textarea id="rm-${o.id}" rows="3" placeholder="待確認事項、卡住的地方…">${esc(d.remark||"")}</textarea>
+          <div style="margin-top:6px"><button class="btn primary" data-a="saveRemark" type="button">儲存備註</button></div></div>
+      </div></td></tr>`;
+    }
+    return row;
   }).join("");
 }
 
@@ -454,11 +489,23 @@ const rowData = (tr) => { const o={}; tr.querySelectorAll("[data-f]").forEach(el
 $("#ownersBody").addEventListener("click", e => {
   const b = e.target.closest("[data-a]"); if(!b) return;
   const tr = b.closest("tr"), id = tr.dataset.id, a = b.dataset.a;
-  const row = state.owners.find(x=>x.id===id);
+  const row = state.owners.find(x=>x.id===id); if(!row) return;
   if(a==="editO"){ state.editing="o:"+id; renderOwners(); }
   else if(a==="cancel"){ state.editing=null; renderAll(); }
   else if(a==="saveO"){ const v=rowData(tr); state.editing=null; write(()=>upd("owners",id,v)); renderOwners(); }
-  else if(a==="delO"){ if(sure(row?.d.section||"")) write(()=>del("owners",id)); }
+  else if(a==="delO"){ if(window.confirm(`確定要刪除「${row.d.section}」嗎？`)) write(()=>del("owners",id)); }
+  else if(a==="stat"){ const st=((row.d.status||0)+1)%3; write(()=>upd("owners",id,{status:st})); }
+  else if(a==="prog"){ state.openOwner = state.openOwner===id ? null : id; renderOwners(); }
+  else if(a==="delDone"){ const done=(row.d.done||[]).filter((_,i)=>i!==Number(b.dataset.i)); write(()=>upd("owners",id,{done})); }
+  else if(a==="saveRemark"){ const remark=$("#rm-"+id).value.trim(); write(()=>upd("owners",id,{remark})); }
+});
+$("#ownersBody").addEventListener("submit", e => {
+  const f=e.target.closest(".doneForm"); if(!f) return;
+  e.preventDefault();
+  const id=f.dataset.id, t=f.t.value.trim(); if(!t) return;
+  const row=state.owners.find(x=>x.id===id); if(!row) return;
+  const done=(row.d.done||[]).concat([{text:t,at:Date.now()}]);
+  write(()=>upd("owners",id,{done})); f.reset();
 });
 
 $("#agendaBody").addEventListener("click", e => {
@@ -639,13 +686,17 @@ const SEED = {
    "section": "邀請卡",
    "owner": "Ting",
    "note": "第一批已印，Ting 已付 $80。確認是否加印。",
-   "order": 2.7
+   "order": 2.7,
+   "status": 1,
+   "done": [{"text": "第一批邀請卡已印，Ting 已付 $80", "at": 1794470400000}]
   },
   "o14": {
    "section": "Cocktail 與酒水",
    "owner": "Vickie",
    "note": "5:30 PM Cocktail 迎賓：Vickie 負責零食、水果和盛盤；酒已訂，安排搬到辦公室及會場。Ting 跟進 Cocktail 的場地安排。",
-   "order": 2.8
+   "order": 2.8,
+   "status": 1,
+   "done": [{"text": "酒已訂", "at": 1794470400000}]
   },
   "o03": {
    "section": "WFG 介紹／簡報",
@@ -879,7 +930,7 @@ function startData(){
   const timer = setTimeout(()=>{ if(pending>0) banner("資料還沒載入完成，可能是網路較慢，畫面上的內容可能不是最新的。"); }, 10000);
   const done = (s) => { if(!s.metadata.fromCache && pending>0){ pending--; if(pending===0){ clearTimeout(timer); } } };
   const err = (e) => { console.error(e); clearTimeout(timer); banner("讀取資料時出錯，請重新整理頁面。如果一直出現，請檢查 Firestore 的規則和 Authentication 有沒有設定好。"); };
-  onSnapshot(query(collection(db,"owners"),orderBy("order")), s=>{state.owners=toList(s);done(s);if(!state.editing)renderOwners();}, err);
+  onSnapshot(query(collection(db,"owners"),orderBy("order")), s=>{state.owners=toList(s);done(s);if(!state.editing && !(document.activeElement && document.activeElement.closest && document.activeElement.closest("tr.detail")))renderOwners();}, err);
   onSnapshot(query(collection(db,"agenda"),orderBy("order")), s=>{state.agenda=toList(s);done(s);if(!state.editing)renderAgenda();}, err);
   onSnapshot(collection(db,"ideas"), s=>{state.ideas=toList(s);done(s);renderIdeas();}, err);
   onSnapshot(collection(db,"votes"), s=>{state.votes=toList(s);done(s);renderIdeas();}, err);
