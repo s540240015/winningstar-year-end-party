@@ -356,6 +356,15 @@ async function write(fn){
 const sure = (what) => window.confirm(`確定要刪除「${what}」嗎？`);
 
 // ---------- RENDER ----------
+function ownersRefresh(){
+  const ae = document.activeElement;
+  if(state.editing || (ae && ae.id && ae.id.startsWith("rm-"))){ state.ownersDirty = true; return; }
+  const doneIn = ae && ae.closest && ae.closest(".doneForm");
+  const keepId = doneIn ? doneIn.dataset.id : null, keepVal = doneIn ? ae.value : "";
+  state.ownersDirty = false;
+  renderOwners();
+  if(keepId){ const inp = document.querySelector(`.doneForm[data-id="${keepId}"] input`); if(inp){ inp.value = keepVal; inp.focus(); } }
+}
 function renderOwners(){
   const tb = $("#ownersBody");
   const ST = ["未開始","進行中","已完成"];
@@ -503,8 +512,11 @@ $("#ownersBody").addEventListener("click", e => {
   else if(a==="delO"){ if(window.confirm(`確定要刪除「${row.d.section}」嗎？`)) write(()=>del("owners",id)); }
   else if(a==="stat"){ const st=((row.d.status||0)+1)%3; write(()=>upd("owners",id,{status:st})); }
   else if(a==="prog"){ state.openOwner = state.openOwner===id ? null : id; renderOwners(); }
-  else if(a==="delDone"){ const done=(row.d.done||[]).filter((_,i)=>i!==Number(b.dataset.i)); write(()=>upd("owners",id,{done})); }
+  else if(a==="delDone"){ const done=(row.d.done||[]).filter((_,i)=>i!==Number(b.dataset.i)); row.d = {...row.d, done}; renderOwners(); write(()=>upd("owners",id,{done})); }
   else if(a==="saveRemark"){ const remark=$("#rm-"+id).value.trim(); write(()=>upd("owners",id,{remark})); }
+});
+$("#ownersBody").addEventListener("focusout", e => {
+  if(e.target.id && e.target.id.startsWith("rm-") && state.ownersDirty) setTimeout(ownersRefresh, 0);
 });
 $("#ownersBody").addEventListener("submit", e => {
   const f=e.target.closest(".doneForm"); if(!f) return;
@@ -512,7 +524,9 @@ $("#ownersBody").addEventListener("submit", e => {
   const id=f.dataset.id, t=f.t.value.trim(); if(!t) return;
   const row=state.owners.find(x=>x.id===id); if(!row) return;
   const done=(row.d.done||[]).concat([{text:t,at:Date.now()}]);
-  write(()=>upd("owners",id,{done})); f.reset();
+  row.d = {...row.d, done}; renderOwners();
+  const inp = document.querySelector(`.doneForm[data-id="${id}"] input`); if(inp) inp.focus();
+  write(()=>upd("owners",id,{done}));
 });
 
 $("#agendaBody").addEventListener("click", e => {
@@ -948,7 +962,7 @@ function startData(){
   const timer = setTimeout(()=>{ if(pending>0) banner("資料還沒載入完成，可能是網路較慢，畫面上的內容可能不是最新的。"); }, 10000);
   const done = (s) => { if(!s.metadata.fromCache && pending>0){ pending--; if(pending===0){ clearTimeout(timer); } } };
   const err = (e) => { console.error(e); clearTimeout(timer); banner("讀取資料時出錯，請重新整理頁面。如果一直出現，請檢查 Firestore 的規則和 Authentication 有沒有設定好。"); };
-  onSnapshot(query(collection(db,"owners"),orderBy("order")), s=>{state.owners=toList(s);done(s);if(!state.editing && !(document.activeElement && document.activeElement.closest && document.activeElement.closest("tr.detail")))renderOwners();}, err);
+  onSnapshot(query(collection(db,"owners"),orderBy("order")), s=>{state.owners=toList(s);done(s);ownersRefresh();}, err);
   onSnapshot(query(collection(db,"agenda"),orderBy("order")), s=>{state.agenda=toList(s);done(s);if(!state.editing)renderAgenda();}, err);
   onSnapshot(collection(db,"ideas"), s=>{state.ideas=toList(s);done(s);renderIdeas();}, err);
   onSnapshot(collection(db,"votes"), s=>{state.votes=toList(s);done(s);renderIdeas();}, err);
