@@ -153,7 +153,7 @@ html{scroll-behavior:smooth}
 </style>
 </head>
 <body>
-<div class="gate" id="gate"><form id="gateForm">
+<div class="gate hide" id="gate"><form id="gateForm">
   <h2>WinningStar 2026 Year-end Party 籌備板</h2>
   <p>請輸入團隊密碼和你的英文名字。</p>
   <div><label class="lbl" for="gatePw">團隊密碼</label><input id="gatePw" type="password" required autocomplete="off"></div>
@@ -987,7 +987,7 @@ function start(){
 const gate = $("#gate");
 $("#gateName").value = myName();
 if(!REQUIRE_PASSWORD || (store.get("wfgPartyOk") === TEAM_PASSWORD && myName())){ gate.classList.add("hide"); start(); }
-else { $("#gatePw").focus(); }
+else { gate.classList.remove("hide"); $("#gatePw").focus(); }
 $("#gateForm").addEventListener("submit", e => {
   e.preventDefault();
   if($("#gatePw").value.trim() !== TEAM_PASSWORD){ $("#gateErr").textContent = "密碼不對，請再試一次。"; return; }
