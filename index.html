@@ -128,6 +128,15 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .status.p0{background:var(--gold-soft);color:var(--gold);border-color:color-mix(in srgb,var(--gold) 40%,transparent)}
 .status.p1{background:color-mix(in srgb,#1a7f4b 14%,transparent);color:#1a7f4b;border-color:color-mix(in srgb,#1a7f4b 40%,transparent)}
 .status.p2{background:color-mix(in srgb,var(--muted) 14%,transparent);color:var(--muted)}
+.goal{margin:-4px 0 12px;display:grid;gap:8px}
+.bar{height:12px;border-radius:99px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.bar i.full{background:#1a7f4b}
+.goal .big{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.goal .big small{font-size:13px;color:var(--muted);font-weight:600;margin-left:6px}
+.status.g0{background:var(--gold-soft);color:var(--gold);border-color:color-mix(in srgb,var(--gold) 40%,transparent)}
+.status.g1{background:color-mix(in srgb,#1a7f4b 14%,transparent);color:#1a7f4b;border-color:color-mix(in srgb,#1a7f4b 40%,transparent)}
+.tier{font:inherit;font-size:13px;padding:3px 6px;width:auto}
 .summary{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .summary .todo{color:var(--danger);font-size:13px;align-self:center}
 .mgr-row{display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:start;padding:6px 0;border-top:1px solid var(--line)}
@@ -187,6 +196,7 @@ html{scroll-behavior:smooth}
     <a href="#owners">分工負責</a>
     <a href="#agenda">議程</a>
     <a href="#providers">Provider 贊助</a>
+    <a href="#prizes">抽獎禮品</a>
     <a href="#ideas">遊戲與節目提議</a>
     <a href="#recog">Recognition</a>
     <a href="#fun">紙盤子趣味獎</a>
@@ -270,6 +280,29 @@ html{scroll-behavior:smooth}
         <div><button class="btn primary" type="submit">新增</button></div>
       </form>
     </details>
+  </section>
+
+  <!-- PRIZES -->
+  <section class="card" id="prizes">
+    <div class="sec-head"><h2>抽獎禮品</h2><span class="hint">一種禮品一行；點狀態切換「已承諾／已收到」</span></div>
+    <div class="goal" id="prizeGoal"></div>
+    <div class="tbl"><table>
+      <thead><tr><th>獎品名稱</th><th>數量</th><th>贊助商</th><th>等級</th><th>狀態</th><th>備註</th><th></th></tr></thead>
+      <tbody id="prizeBody"><tr><td colspan="7" class="empty">載入中…</td></tr></tbody>
+    </table></div>
+    <datalist id="sponsorList"></datalist>
+    <form class="form writer" id="prizeForm">
+      <div class="row">
+        <div><label class="lbl" for="pzName">獎品名稱</label><input id="pzName" required placeholder="例如：保溫水杯"></div>
+        <div style="flex:0 1 90px"><label class="lbl" for="pzQty">數量</label><input id="pzQty" inputmode="numeric" required placeholder="3"></div>
+        <div><label class="lbl" for="pzSp">贊助商</label><input id="pzSp" list="sponsorList" placeholder="選擇或輸入，例如 WFG 自購"></div>
+        <div style="flex:0 1 120px"><label class="lbl" for="pzTier">等級</label><select id="pzTier"><option>未分級</option><option>小獎</option><option>中獎</option><option>中大獎</option></select></div>
+      </div>
+      <div class="row">
+        <div><label class="lbl" for="pzNote">備註</label><input id="pzNote" placeholder="例如：寄到 Flushing office"></div>
+        <button class="btn primary" type="submit" style="align-self:end">加入</button>
+      </div>
+    </form>
   </section>
 
   <!-- IDEAS -->
@@ -531,7 +564,7 @@ function renderFun(){
     }).join("");
   }
 
-  function renderAll(){ renderOwners(); renderAgenda(); renderIdeas(); renderRec(); renderFun(); renderProviders(); }
+  function renderAll(){ renderOwners(); renderAgenda(); renderIdeas(); renderRec(); renderFun(); renderProviders(); renderPrizes(); }
 
 // ---------- EVENTS ----------
 const rowData = (tr) => { const o={}; tr.querySelectorAll("[data-f]").forEach(el=>o[el.dataset.f]=el.value.trim()); return o; };
@@ -664,6 +697,60 @@ $("#provForm").addEventListener("submit", e=>{
   const v={company:$("#pvCo").value.trim(),contact:$("#pvWho").value.trim(),people:$("#pvPpl").value.trim(),amount:$("#pvAmt").value.trim(),give:$("#pvGive").value.trim(),note:$("#pvNote").value.trim(),status:0,order:Date.now()};
   if(!v.company) return;
   write(()=>pvAdd(v)); e.target.reset();
+});
+const pzAdd=(d)=>add("prizes",d), pzUpd=(id,d)=>upd("prizes",id,d), pzDel=(id)=>del("prizes",id);
+const PRIZE_GOAL=50, TIERS=["未分級","小獎","中獎","中大獎"], GST=["已承諾","已收到"];
+const qtyOf = x => parseInt(x.d.qty)||0;
+function renderPrizes(){
+  const list=state.prizes||[];
+  const total=list.reduce((t,x)=>t+qtyOf(x),0), got=list.filter(x=>x.d.status===1).reduce((t,x)=>t+qtyOf(x),0);
+  const pct=Math.min(100,Math.round(total/PRIZE_GOAL*100));
+  const byTier=TIERS.map(t=>[t,list.filter(x=>(x.d.tier||"未分級")===t).reduce((a,x)=>a+qtyOf(x),0)]).filter(([t,n])=>n>0);
+  const bySp={}; list.forEach(x=>{ const k=x.d.sponsor||"未填"; bySp[k]=(bySp[k]||0)+qtyOf(x); });
+  $("#prizeGoal").innerHTML = `<div class="big">${total} / ${PRIZE_GOAL} 份<small>${total>=PRIZE_GOAL?"已達標 🎉":"還差 "+(PRIZE_GOAL-total)+" 份"}・已收到 ${got} 份</small></div>
+    <div class="bar" role="img" aria-label="已有 ${total} 份，目標 ${PRIZE_GOAL} 份"><i class="${total>=PRIZE_GOAL?"full":""}" style="width:${pct}%"></i></div>
+    <div class="ostat" style="margin:0">${byTier.map(([t,n])=>`<span class="chip">${t} ${n}</span>`).join("")}${Object.entries(bySp).map(([k,n])=>`<span class="chip grey">${esc(k)} ${n}</span>`).join("")}</div>`;
+  const names=[...new Set([...(state.providers||[]).map(x=>x.d.company).filter(Boolean),"WFG 自購"])];
+  $("#sponsorList").innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join("");
+  const tb=$("#prizeBody");
+  if(!list.length){ tb.innerHTML=`<tr><td colspan="7" class="empty">還沒有獎品，請在下方加入。</td></tr>`; return; }
+  tb.innerHTML=list.map(x=>{
+    const d=x.d, st=d.status||0;
+    if(state.editing==="g:"+x.id){
+      return `<tr class="edit-in" data-id="${x.id}">
+        <td><input data-f="name" value="${esc(d.name)}" aria-label="獎品名稱"></td>
+        <td><input data-f="qty" value="${esc(d.qty)}" aria-label="數量" style="width:60px"></td>
+        <td><input data-f="sponsor" value="${esc(d.sponsor)}" list="sponsorList" aria-label="贊助商"></td>
+        <td></td><td></td>
+        <td><input data-f="note" value="${esc(d.note)}" aria-label="備註"></td>
+        <td class="act"><button class="btn primary" data-a="saveG" type="button">儲存</button> <button class="btn link" data-a="cancel" type="button">取消</button></td></tr>`;
+    }
+    return `<tr data-id="${x.id}"><td><b>${esc(d.name)}</b></td><td class="num">${qtyOf(x)}</td><td class="owner">${esc(d.sponsor)||"—"}</td>
+      <td><select class="tier" data-a="tier" aria-label="等級">${TIERS.map(t=>`<option ${(d.tier||"未分級")===t?"selected":""}>${t}</option>`).join("")}</select></td>
+      <td><button class="status g${st}" data-a="gstat" type="button" title="點一下切換狀態">${GST[st]}</button></td>
+      <td>${esc(d.note)}</td>
+      <td class="act"><button class="btn link" data-a="editG" type="button">編輯</button><button class="btn link del" data-a="delG" type="button">刪除</button></td></tr>`;
+  }).join("");
+}
+$("#prizeBody").addEventListener("click", e=>{
+  const b=e.target.closest("button[data-a]"); if(!b) return;
+  const tr=b.closest("tr"), id=tr.dataset.id, a=b.dataset.a;
+  const x=(state.prizes||[]).find(y=>y.id===id); if(!x) return;
+  if(a==="editG"){ state.editing="g:"+id; renderPrizes(); }
+  else if(a==="cancel"){ state.editing=null; renderAll(); }
+  else if(a==="saveG"){ const v={}; tr.querySelectorAll("[data-f]").forEach(el=>v[el.dataset.f]=el.value.trim()); state.editing=null; write(()=>pzUpd(id,v)); renderPrizes(); }
+  else if(a==="gstat"){ write(()=>pzUpd(id,{status:(x.d.status||0)?0:1})); }
+  else if(a==="delG"){ if(window.confirm(`確定要刪除「${x.d.name}」嗎？`)) write(()=>pzDel(id)); }
+});
+$("#prizeBody").addEventListener("change", e=>{
+  const sel=e.target.closest("select[data-a='tier']"); if(!sel) return;
+  const id=sel.closest("tr").dataset.id; write(()=>pzUpd(id,{tier:sel.value}));
+});
+$("#prizeForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const v={name:$("#pzName").value.trim(),qty:$("#pzQty").value.trim(),sponsor:$("#pzSp").value.trim(),tier:$("#pzTier").value,note:$("#pzNote").value.trim(),status:0,order:Date.now()};
+  if(!v.name||!(parseInt(v.qty)>0)) return;
+  write(()=>pzAdd(v)); e.target.reset(); $("#pzName").focus();
 });
 $("#ideaFilters").addEventListener("click", e => {
   const b=e.target.closest("[data-k]"); if(!b) return;
@@ -1097,6 +1184,70 @@ async function seedProviders(){
     for(const [id,d] of Object.entries(PROV_SEED)) await put("providers",id,d);
   } catch(e){ console.error(e); }
 }
+const PRIZE_SEED = {
+ "g1": {
+  "name": "水杯",
+  "qty": "3",
+  "sponsor": "Pacific Life",
+  "tier": "未分級",
+  "status": 0,
+  "note": "寄到 Flushing office",
+  "order": 1
+ },
+ "g2": {
+  "name": "Backpack",
+  "qty": "3",
+  "sponsor": "Pacific Life",
+  "tier": "未分級",
+  "status": 0,
+  "note": "寄到 Flushing office",
+  "order": 2
+ },
+ "g3": {
+  "name": "Duffel bag",
+  "qty": "2",
+  "sponsor": "First Trust",
+  "tier": "未分級",
+  "status": 0,
+  "note": "",
+  "order": 3
+ },
+ "g4": {
+  "name": "Cooler bag",
+  "qty": "2",
+  "sponsor": "First Trust",
+  "tier": "未分級",
+  "status": 0,
+  "note": "原文「2- 2 cooler bags」，數量待確認",
+  "order": 4
+ },
+ "g5": {
+  "name": "筆",
+  "qty": "20",
+  "sponsor": "First Trust",
+  "tier": "未分級",
+  "status": 0,
+  "note": "20 支筆可考慮合併成幾份，或當參加獎",
+  "order": 5
+ },
+ "g6": {
+  "name": "雨傘",
+  "qty": "1",
+  "sponsor": "First Trust",
+  "tier": "未分級",
+  "status": 0,
+  "note": "",
+  "order": 6
+ }
+};
+async function seedPrizes(){
+  try {
+    const flag = await getDoc(doc(db,"meta","seededPrizes"));
+    if(flag.exists()) return;
+    await put("meta","seededPrizes",{at:Date.now()});
+    for(const [id,d] of Object.entries(PRIZE_SEED)) await put("prizes",id,d);
+  } catch(e){ console.error(e); }
+}
 // ---------- DATA ----------
 const toList = snap => snap.docs.map(d=>({id:d.id,d:d.data()||{}}));
 let pubStarted=false;
@@ -1119,8 +1270,10 @@ function startData(){
   const err = (e) => { console.error(e); clearTimeout(timer); banner("讀取資料時出錯，請重新整理頁面。如果一直出現，請檢查 Firestore 的規則和 Authentication 有沒有設定好。"); };
   onSnapshot(query(collection(db,"owners"),orderBy("order")), s=>{state.owners=toList(s);done(s);ownersRefresh();}, err);
   onSnapshot(query(collection(db,"agenda"),orderBy("order")), s=>{state.agenda=toList(s);done(s);if(!state.editing)renderAgenda();}, err);
-  onSnapshot(query(collection(db,"providers"),orderBy("order")), s=>{state.providers=toList(s);if(!state.editing)renderProviders();}, err);
+  onSnapshot(query(collection(db,"providers"),orderBy("order")), s=>{state.providers=toList(s);if(!state.editing){renderProviders();renderPrizes();}}, err);
   seedProviders();
+  onSnapshot(query(collection(db,"prizes"),orderBy("order")), s=>{state.prizes=toList(s);if(!state.editing)renderPrizes();}, err);
+  seedPrizes();
   onSnapshot(collection(db,"ideas"), s=>{state.ideas=toList(s);done(s);renderIdeas();}, err);
   onSnapshot(collection(db,"votes"), s=>{state.votes=toList(s);done(s);renderIdeas();}, err);
   onSnapshot(query(collection(db,"recCats"),orderBy("order")), s=>{state.recCats=toList(s);done(s);renderRec();}, err);
