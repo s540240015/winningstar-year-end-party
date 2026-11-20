@@ -137,6 +137,8 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .status.g0{background:var(--gold-soft);color:var(--gold);border-color:color-mix(in srgb,var(--gold) 40%,transparent)}
 .status.g1{background:color-mix(in srgb,#1a7f4b 14%,transparent);color:#1a7f4b;border-color:color-mix(in srgb,#1a7f4b 40%,transparent)}
 .tier{font:inherit;font-size:13px;padding:3px 6px;width:auto}
+.tbl-in{width:80px;padding:5px 7px}
+tfoot td{font-weight:700;border-top:2px solid var(--line);border-bottom:none}
 .summary{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .summary .todo{color:var(--danger);font-size:13px;align-self:center}
 .mgr-row{display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:start;padding:6px 0;border-top:1px solid var(--line)}
@@ -182,7 +184,7 @@ html{scroll-behavior:smooth}
     <div class="hero">
       <div>
         <h1>WinningStar 2026 Year-end Party 籌備板</h1>
-        <p>派對日期：<b>12/12（六）</b>　分工、議程、節目提議與 Recognition 名單，大家一起看、一起填。</p>
+        <p>派對日期：<b>12/12（六）</b>　分工、時間表、Provider、抽獎禮品與 Recognition 名單，大家一起看、一起填。</p>
       </div>
       <div class="meeting" id="meeting"><span>下次開會</span><b id="meetingText">每週五 早上 9:00</b></div>
     </div>
@@ -194,12 +196,11 @@ html{scroll-behavior:smooth}
 <nav class="sec" aria-label="區塊">
   <div class="wrap">
     <a href="#owners">分工負責</a>
-    <a href="#agenda">議程</a>
+    <a href="#agenda">時間表</a>
+    <a href="#tables">各 SMD 桌數</a>
     <a href="#providers">Provider 贊助</a>
     <a href="#prizes">抽獎禮品</a>
-    <a href="#ideas">遊戲與節目提議</a>
     <a href="#recog">Recognition</a>
-    <a href="#fun">紙盤子趣味獎</a>
   </div>
 </nav>
 
@@ -207,7 +208,7 @@ html{scroll-behavior:smooth}
 <main>
   <!-- OWNERS -->
   <section class="card" id="owners">
-    <div class="sec-head"><h2>分工負責</h2><span class="hint">點狀態可切換；點「進度」記錄已完成事項和備註</span></div>
+    <div class="sec-head"><h2>分工負責</h2><span class="hint">點狀態可切換「進行中／已完成」；點「進度」記錄已完成事項和備註</span></div>
     <div class="ostat" id="ownerStats"></div>
     <div class="tbl"><table>
       <thead><tr><th>項目</th><th>負責人</th><th>主要任務</th><th>狀態</th><th>進度</th><th></th></tr></thead>
@@ -228,7 +229,7 @@ html{scroll-behavior:smooth}
 
   <!-- AGENDA -->
   <section class="card" id="agenda">
-    <div class="sec-head"><h2>議程</h2><span class="hint">由 Ting 與 Katrina 整理；可逐條新增，或整份貼上</span></div>
+    <div class="sec-head"><h2>時間表</h2><span class="hint">依開始時間自動排序；改時間後順序會自動調整</span></div>
     <div class="tbl"><table>
       <thead><tr><th>時間</th><th>節目</th><th>負責人／主持</th><th>備註</th><th></th></tr></thead>
       <tbody id="agendaBody"><tr><td colspan="5" class="empty">載入中…</td></tr></tbody>
@@ -236,24 +237,34 @@ html{scroll-behavior:smooth}
     <div class="writer">
       <form class="form" id="agendaForm">
         <div class="row">
-          <div style="flex:0 1 110px"><label class="lbl" for="aTime">時間</label><input id="aTime" placeholder="18:30"></div>
+          <div style="flex:0 1 110px"><label class="lbl" for="aTime">時間</label><input id="aTime" placeholder="6:30 或 6:30 - 6:45"></div>
           <div><label class="lbl" for="aItem">節目</label><input id="aItem" required></div>
           <div><label class="lbl" for="aWho">負責人／主持</label><input id="aWho"></div>
           <div><label class="lbl" for="aNote">備註</label><input id="aNote"></div>
-          <button class="btn primary" type="submit" style="align-self:end">加到議程</button>
+          <button class="btn primary" type="submit" style="align-self:end">加到時間表</button>
         </div>
       </form>
       <details style="margin-top:10px">
-        <summary>整份貼上議程（會取代目前的議程）</summary>
+        <summary>整份貼上時間表（會取代目前的時間表）</summary>
         <form class="form" id="agendaBulk">
           <label class="lbl" for="bulkText">每行一項，用「|」分隔：時間 | 節目 | 負責人 | 備註</label>
           <textarea id="bulkText" rows="7" placeholder="18:00 | 入場報到 | Theresa | &#10;18:30 | WFG 形象影片 |  | 約 3 分鐘&#10;18:35 | WFG 介紹 | Vickie | 5–10 分鐘"></textarea>
           <label class="lbl" for="bulkFile">或上傳 .txt / .csv 檔（同樣格式，CSV 用逗號分隔）</label>
           <input type="file" id="bulkFile" accept=".txt,.csv,text/plain,text/csv">
-          <div><button class="btn primary" type="submit">取代議程</button></div>
+          <div><button class="btn primary" type="submit">取代時間表</button></div>
         </form>
       </details>
     </div>
+  </section>
+
+  <!-- TABLES -->
+  <section class="card" id="tables">
+    <div class="sec-head"><h2>各 SMD 桌數</h2><span class="hint">直接在格子裡填，離開格子就會儲存；每桌 $700，支票開給餐廳</span></div>
+    <div class="tbl"><table>
+      <thead><tr><th>SMD</th><th>桌數</th><th>預計人數</th><th>應付餐費</th><th>備註</th></tr></thead>
+      <tbody id="tableBody"><tr><td colspan="5" class="empty">載入中…</td></tr></tbody>
+      <tfoot id="tableFoot"></tfoot>
+    </table></div>
   </section>
 
   <!-- PROVIDERS -->
@@ -306,7 +317,7 @@ html{scroll-behavior:smooth}
   </section>
 
   <!-- IDEAS -->
-  <section class="card" id="ideas">
+  <section class="card" id="ideas" hidden>
     <div class="sec-head"><h2>遊戲與節目提議</h2>
       <div class="filters" id="ideaFilters" role="group" aria-label="篩選">
         <button class="btn on" data-k="all" type="button">全部</button>
@@ -349,7 +360,7 @@ html{scroll-behavior:smooth}
   </section>
 
   <!-- FUN AWARDS (private) -->
-  <section class="card" id="fun">
+  <section class="card" id="fun" hidden>
     <div class="sec-head"><h2>紙盤子趣味獎</h2><span class="lock">🔒 獎項名稱和頒獎詞大家都看得到；頒給誰只有你自己看得到；不會顯示是誰填的</span></div>
     <p class="hint" style="margin:-6px 0 0;color:var(--muted);font-size:13px">想一個好笑的獎項名稱，寫上要頒給誰。看看大家想到的獎項找靈感，一個人可以填好幾個！</p>
     <form class="form writer" id="funForm">
@@ -368,7 +379,7 @@ html{scroll-behavior:smooth}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, getDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // ====== 設定 ======
@@ -435,12 +446,13 @@ function ownersRefresh(){
 function renderOwners(){
   const tb = $("#ownersBody");
   const ST = ["未開始","進行中","已完成"];
-  const cnt=[0,0,0]; state.owners.forEach(o=>cnt[o.d.status||0]++);
-  $("#ownerStats").innerHTML = state.owners.length ? ST.map((t,i)=>`<span class="status s${i}" style="cursor:default">${t} ${cnt[i]}</span>`).join("") : "";
+  const stOf = o => (o.d.status===2 ? 2 : 1);
+  const cnt=[0,0,0]; state.owners.forEach(o=>cnt[stOf(o)]++);
+  $("#ownerStats").innerHTML = state.owners.length ? [1,2].map(i=>`<span class="status s${i}" style="cursor:default">${ST[i]} ${cnt[i]}</span>`).join("") : "";
   if(!state.owners.length){ tb.innerHTML = `<tr><td colspan="6" class="empty">還沒有分工項目</td></tr>`; return; }
   const fmt = t => { const d=new Date(t); return (d.getMonth()+1)+"/"+d.getDate(); };
   tb.innerHTML = state.owners.map(o => {
-    const d = o.d, st = d.status||0, done = d.done||[];
+    const d = o.d, st = stOf(o), done = d.done||[];
     if(state.editing === "o:"+o.id){
       return `<tr class="edit-in" data-id="${o.id}">
         <td><input data-f="section" value="${esc(d.section)}" aria-label="項目"></td>
@@ -468,10 +480,21 @@ function renderOwners(){
   }).join("");
 }
 
+function timeKey(t){
+  const m = String(t||"").match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+  if(!m) return Infinity;
+  let h = +m[1]; const mi = +(m[2]||0), ap = (m[3]||"").toLowerCase();
+  if(ap==="pm" && h<12) h+=12; else if(ap==="am" && h===12) h=0; else if(!ap && h>=1 && h<=11) h+=12;
+  return h*60+mi;
+}
+function sortedAgenda(){
+  return state.agenda.slice().sort((a,b)=> (timeKey(a.d.time)-timeKey(b.d.time)) || ((a.d.order||0)-(b.d.order||0)));
+}
 function renderAgenda(){
   const tb = $("#agendaBody");
-  if(!state.agenda.length){ tb.innerHTML = `<tr><td colspan="5" class="empty">議程還沒上傳，Ting 可以在下方新增或整份貼上</td></tr>`; return; }
-  tb.innerHTML = state.agenda.map((a,i) => {
+  if(!state.agenda.length){ tb.innerHTML = `<tr><td colspan="5" class="empty">時間表還沒上傳，Ting 可以在下方新增或整份貼上</td></tr>`; return; }
+  const sorted = sortedAgenda();
+  tb.innerHTML = sorted.map((a,i) => {
     const d = a.d;
     if(state.editing === "a:"+a.id){
       return `<tr class="edit-in" data-id="${a.id}">
@@ -482,7 +505,7 @@ function renderAgenda(){
         <td class="act"><button class="btn primary" data-a="saveA" type="button">儲存</button> <button class="btn link" data-a="cancel" type="button">取消</button></td></tr>`;
     }
     return `<tr data-id="${a.id}"><td class="time">${esc(d.time) || "—"}</td><td><b>${esc(d.item)}</b></td><td class="owner">${esc(d.who)}</td><td>${esc(d.note)}</td>
-      <td class="act"><button class="btn link" data-a="up" type="button" aria-label="上移" ${i===0?"disabled":""}>↑</button><button class="btn link" data-a="down" type="button" aria-label="下移" ${i===state.agenda.length-1?"disabled":""}>↓</button><button class="btn link" data-a="editA" type="button">編輯</button><button class="btn link del" data-a="delA" type="button">刪除</button></td></tr>`;
+      <td class="act"><button class="btn link" data-a="editA" type="button">編輯</button><button class="btn link del" data-a="delA" type="button">刪除</button></td></tr>`;
   }).join("");
 }
 
@@ -564,7 +587,7 @@ function renderFun(){
     }).join("");
   }
 
-  function renderAll(){ renderOwners(); renderAgenda(); renderIdeas(); renderRec(); renderFun(); renderProviders(); renderPrizes(); }
+  function renderAll(){ renderOwners(); renderAgenda(); renderIdeas(); renderRec(); renderFun(); renderProviders(); renderPrizes(); renderTables(); }
 
 // ---------- EVENTS ----------
 const rowData = (tr) => { const o={}; tr.querySelectorAll("[data-f]").forEach(el=>o[el.dataset.f]=el.value.trim()); return o; };
@@ -577,7 +600,7 @@ $("#ownersBody").addEventListener("click", e => {
   else if(a==="cancel"){ state.editing=null; renderAll(); }
   else if(a==="saveO"){ const v=rowData(tr); state.editing=null; write(()=>upd("owners",id,v)); renderOwners(); }
   else if(a==="delO"){ if(window.confirm(`確定要刪除「${row.d.section}」嗎？`)) write(()=>del("owners",id)); }
-  else if(a==="stat"){ const st=((row.d.status||0)+1)%3; write(()=>upd("owners",id,{status:st})); }
+  else if(a==="stat"){ const st=(row.d.status===2)?1:2; write(()=>upd("owners",id,{status:st})); }
   else if(a==="prog"){ state.openOwner = state.openOwner===id ? null : id; renderOwners(); }
   else if(a==="delDone"){ const done=(row.d.done||[]).filter((_,i)=>i!==Number(b.dataset.i)); row.d = {...row.d, done}; renderOwners(); write(()=>upd("owners",id,{done})); }
   else if(a==="saveRemark"){ const remark=$("#rm-"+id).value.trim(); write(()=>upd("owners",id,{remark})); }
@@ -635,7 +658,7 @@ $("#agendaBulk").addEventListener("submit", e => {
   e.preventDefault();
   const lines = $("#bulkText").value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
   if(!lines.length) return;
-  if(!window.confirm("這會取代目前整份議程，確定嗎？")) return;
+  if(!window.confirm("這會取代目前整份時間表，確定嗎？")) return;
   const base = Date.now();
   const rows = lines.map((l,i)=>{ const p=l.split("|").map(s=>s.trim()); return {time:p[0]||"",item:p[1]||p[0]||"",who:p[2]||"",note:p.slice(3).join(" | "),order:base+i,by:me}; });
   const old = state.agenda.slice();
@@ -752,6 +775,32 @@ $("#prizeForm").addEventListener("submit", e=>{
   if(!v.name||!(parseInt(v.qty)>0)) return;
   write(()=>pzAdd(v)); e.target.reset(); $("#pzName").focus();
 });
+const tbPut=(id,d)=>put("tables",id,d);
+const TABLE_PRICE=700, TABLE_CAP=20;
+function renderTables(){
+  const ae=document.activeElement;
+  if(ae && ae.closest && ae.closest("#tableBody")){ state.tablesDirty=true; return; }
+  state.tablesDirty=false;
+  const map={}; (state.tables||[]).forEach(x=>map[x.id]=x.d);
+  let tt=0, tp=0;
+  $("#tableBody").innerHTML = MANAGERS.map(m=>{
+    const d=map[m]||{}, n=parseFloat(d.tables)||0, ppl=parseInt(d.people)||0; tt+=n; tp+=ppl;
+    return `<tr data-m="${esc(m)}"><td class="owner">${esc(m)}</td>
+      <td><input class="tbl-in" data-f="tables" inputmode="decimal" value="${esc(d.tables||"")}" aria-label="${esc(m)} 桌數"></td>
+      <td><input class="tbl-in" data-f="people" inputmode="numeric" value="${esc(d.people||"")}" aria-label="${esc(m)} 預計人數"></td>
+      <td class="num">${n?"$"+(n*TABLE_PRICE).toLocaleString():"—"}</td>
+      <td><input data-f="note" value="${esc(d.note||"")}" aria-label="${esc(m)} 備註"></td></tr>`;
+  }).join("");
+  $("#tableFoot").innerHTML = `<tr><td>合計</td><td class="num">${tt} 桌${tt>TABLE_CAP?` <span class="chip" style="color:var(--danger)">超過 ${TABLE_CAP} 桌</span>`:` <span class="prog">（上限約 ${TABLE_CAP} 桌）</span>`}</td><td class="num">${tp} 人</td><td class="num">$${(tt*TABLE_PRICE).toLocaleString()}</td><td></td></tr>`;
+}
+$("#tableBody").addEventListener("change", e=>{
+  const el=e.target.closest("[data-f]"); if(!el) return;
+  const m=el.closest("tr").dataset.m;
+  const cur=((state.tables||[]).find(x=>x.id===m)||{d:{}}).d;
+  const v={tables:cur.tables||"",people:cur.people||"",note:cur.note||""}; v[el.dataset.f]=el.value.trim();
+  write(()=>tbPut(m,v));
+});
+$("#tableBody").addEventListener("focusout", ()=>{ setTimeout(()=>{ if(state.tablesDirty) renderTables(); },0); });
 $("#ideaFilters").addEventListener("click", e => {
   const b=e.target.closest("[data-k]"); if(!b) return;
   state.filter=b.dataset.k;
@@ -863,7 +912,7 @@ const SEED = {
  },
  "owners": {
   "o01": {
-   "section": "議程／流程表",
+   "section": "時間表／流程表",
    "owner": "Katrina + Ting",
    "note": "完成逐段流程表：主持分工、中英文串場、影片播放、致詞人與時長、頒獎／表演／抽獎順序。確認 DJ 的播放需求、費用及付款方式。下次會議帶初稿。",
    "order": 1
@@ -1248,6 +1297,32 @@ async function seedPrizes(){
     for(const [id,d] of Object.entries(PRIZE_SEED)) await put("prizes",id,d);
   } catch(e){ console.error(e); }
 }
+const MIG1120 = {"append": {"o01": "【11/20】依「先播 WFG 影片、再由 MC 開場」校正時間表（Jiarui）。6:30 上菜時加入主持轉場：主持人輪流、英文、每段約 2 分鐘。Provider 先上台，再 Recognition，Theresa 最後發言。Ting、Katrina 整理現場可直接使用的流程表。", "o11": "【11/20】MC 開場 5 分鐘內：歡迎賓客、帶動氣氛、引介講者；主持人發言時召集下一段人員候場、依序上台。", "o02": "【11/20】同一團隊集中同一區（初步：Theresa 團隊一區、六桌團隊一區，其餘在中央）。估約 18 桌，加 Theresa 原訂 2 桌約 20 桌；各團隊桌數填在「各 SMD 桌數」。", "o16": "【11/20】各 SMD 把桌數和人數填在「各 SMD 桌數」表；Theresa 確認第二桌實際出席人數。", "o03": "【11/20】Zhijie 確認 WFG 影片最終版本並交給 DJ；Lisa 表演影片及其他 DJ 素材也先交 Zhijie 轉 DJ。", "o04": "【11/20】填報者補齊 Last Name、獎項類別、服務年資。每個類別準備獎狀，Jean 印製（可用 AI，需要時找人幫忙），Jean、Ting 安排唱名與上台；頒獎可在用餐期間進行。", "o12": "【11/20】餐廳 4 點前還有活動，工作人員 4:00 PM 到場，趁場地收拾時開始佈置。", "o05": "【11/20】一場 7:47–8:00。提供卡片尺寸給 Amber 選小禮袋；禮袋放 Bingo 卡、筆、糖果巧克力，11/21 早上在 Flushing office 組裝。與 DJ 確認螢幕顯示已抽號碼；現場小桌放轉輪；獎品用禮品卡。筆約 25 支，待確認是否足夠。", "o06": "【11/20】自願上台、現場投票，每桌 2 支玫瑰，工作人員也可參加；主持人說明規則。準備最佳服裝禮品卡。8 分鐘或 15 分鐘以上待統一。Amber 11/21 帶 200 份烘乾紙放入小禮袋。", "o07": "【11/20】連上下台預留 8 分鐘，排在 Recognition 之後、抽獎之前。12/2、12/9 在 Flushing office 排練（12/2 晚 6 點 Lisa 有聚餐）；11/25 前與 Angie 協調排練；男主唱人選待定。", "o08": "【11/20】通知 Provider 6:00 PM 到場擺攤；上台 6:30–7:00 或 6:45–7:00 待統一，晚到者排到抽獎時段。確認 Michael、Maggie、Transamerica 到場安排；追蹤 EMS 現金贊助；再聯絡 Symetra 的 Nate。考量 compliance，現金贊助扣除 cocktail、酒、DJ 後改買禮卡。"}, "rename": {"o01": {"section": "時間表／流程表"}, "o05": {"owner": "Xiuwei + Shufang"}}, "new": {"o18": {"section": "團隊介紹", "owner": "Katrina + Ting", "note": "MC 開場後，MD、SMD 依序上台自我介紹（姓名、所在地、背景、在 WFG 的年資），不用照片投影片。確認上台名單與順序、實際出席成員，以及新任 MD 是否依辦公室海報排序。", "order": 3.5}, "o19": {"section": "餐廳付款與收據", "owner": "各 SMD", "note": "活動當天各 SMD 帶支票，每桌 $700，抬頭開給餐廳，由負責人統一結帳。餐廳按各團隊桌數開收據（列明 food and beverage）。Provider 可能當天付款，請提早到場。已付 $500 還是定金 $1,000 待核實。", "order": 9.2}, "o20": {"section": "抽獎主持與抽獎人", "owner": "Katrina + Vickie + Jean", "note": "三場抽獎由 Katrina 與另一位主持人帶領：第一場 Jean 抽；第二場時間表寫 Theresa，但 11/20 會議說由 Lisa 抽，待確認；大獎由 Vickie 與一位 Provider 抽（人選待確認）。最終獎品數、是否剔除小獎、是否加抽待定。", "order": 9.3}, "o21": {"section": "Top Producer", "owner": "Vickie + Jean", "note": "11/30 結帳後，Vickie 依個人 production report 列出全體前五名及前十名（SMD 也計入），只頒給出席者；Jean 確認得獎名單。報表交付、名單定稿與獎狀列印期限待確認。", "order": 4.2}, "o22": {"section": "廠商飲品", "owner": "Amber", "note": "確認廠商是否到場提供飲品（3 張桌子可用，可搭配我們準備的酒）；確認廠商可提供的獎品內容、數量，以及約 $200 價值是否適用。", "order": 2.9}, "o24": {"section": "卡拉 OK 與收尾大合唱", "owner": "主持人", "note": "抽獎後卡拉 OK：主持人先唱暖場（準備一首男女合唱、音域不高的歌），並引導大家到 DJ 處點歌。收尾大合唱歌曲待選（「明天會更好」不太適合）。", "order": 7.5}}, "ag": [["eq", "工作人員到場", "餐廳 4 點前還有活動，趁場地收拾時開始佈置"], ["has", "WFG Video", "先播影片讓現場安靜，再由 MC 開場"], ["has", "MC 開場", "5 分鐘內：歡迎賓客、帶動氣氛、引介講者"], ["eq", "MC转场", "英文，主持人輪流；發言時召集下一段人員候場"], ["has", "Providers", "Provider 6:00 到場擺攤；6:30–7:00 或 6:45–7:00 待統一，晚到者排到抽獎時段"], ["eq", "Recognition", "每個類別準備獎狀；Jean、Ting 安排唱名與上台；Theresa 最後發言"], ["has", "樂團", "連上下台預留 8 分鐘"], ["has", "抽獎（小獎）", "Katrina 與另一位主持人帶領"], ["eq", "Bingo", "螢幕顯示已抽號碼；卡片和筆在入場小禮袋；獎品用禮品卡"], ["has", "最佳服裝", "自願上台，每桌 2 支玫瑰投票；8 分鐘或 15 分鐘以上待統一"], ["has", "抽獎（中獎）", "11/20 會議說第二場由 Lisa 抽，待確認"], ["has", "合唱", "收尾歌曲待選（「明天會更好」不太適合）"]], "timefix": [["MC转场", "6:00-6:32", "6:30-6:32"]], "next": "11/28（五）晚上 9:00（必要時延到 10:00）", "tables": {"Theresa": {"tables": "2", "people": "", "note": "第二桌能否坐滿待確認"}}};
+const addNote = (cur, add) => { cur = String(cur||""); return cur.includes(add) ? cur : (cur ? cur + (/[。；.\s]$/.test(cur)?"":"；") + add : add); };
+async function migrate1120(){
+  try {
+    const flag = await getDoc(doc(db,"meta","update1120"));
+    if(flag.exists()) return;
+    await put("meta","update1120",{at:Date.now()});
+    // 分工：只在「主要任務」後面補充，不覆蓋大家改過的內容
+    for(const [id,add] of Object.entries(MIG1120.append)){ const d=await getDoc(doc(db,"owners",id)); if(d.exists()) await upd("owners",id,{note:addNote(d.data().note,add), ...(MIG1120.rename[id]||{})}); }
+    for(const [id,v] of Object.entries(MIG1120.rename)){ if(MIG1120.append[id]) continue; const d=await getDoc(doc(db,"owners",id)); if(d.exists()) await upd("owners",id,v); }
+    for(const [id,v] of Object.entries(MIG1120.new)){ const d=await getDoc(doc(db,"owners",id)); if(!d.exists()) await put("owners",id,v); }
+    // 時間表：依節目名稱在備註後面補充；修正 MC转场 6:00-6:32
+    const ag=(await getDocs(collection(db,"agenda"))).docs;
+    for(const d of ag){
+      const v=d.data(), item=String(v.item||"").trim(); const ch={};
+      for(const [k,item0,from,to] of MIG1120.timefix.map(x=>["eq",...x])){ if(item===item0 && String(v.time||"").replace(/\s/g,"")===from.replace(/\s/g,"")) ch.time=to; }
+      let note=v.note||"";
+      for(const [mode,txt,add] of MIG1120.ag){ if(mode==="eq" ? item===txt : item.includes(txt)) note=addNote(note,add); }
+      if(note!==(v.note||"")) ch.note=note;
+      if(Object.keys(ch).length) await upd("agenda",d.id,ch);
+    }
+    const info=await getDoc(doc(db,"meta","info"));
+    await put("meta","info",{...(info.exists()?info.data():{}), nextMeeting:MIG1120.next});
+    for(const [id,v] of Object.entries(MIG1120.tables)){ const d=await getDoc(doc(db,"tables",id)); if(!d.exists()) await put("tables",id,v); }
+  } catch(e){ console.error(e); }
+}
 // ---------- DATA ----------
 const toList = snap => snap.docs.map(d=>({id:d.id,d:d.data()||{}}));
 let pubStarted=false;
@@ -1274,12 +1349,13 @@ function startData(){
   seedProviders();
   onSnapshot(query(collection(db,"prizes"),orderBy("order")), s=>{state.prizes=toList(s);if(!state.editing)renderPrizes();}, err);
   seedPrizes();
+  onSnapshot(collection(db,"tables"), s=>{state.tables=toList(s);renderTables();}, err);
   onSnapshot(collection(db,"ideas"), s=>{state.ideas=toList(s);done(s);renderIdeas();}, err);
   onSnapshot(collection(db,"votes"), s=>{state.votes=toList(s);done(s);renderIdeas();}, err);
   onSnapshot(query(collection(db,"recCats"),orderBy("order")), s=>{state.recCats=toList(s);done(s);renderRec();}, err);
   onSnapshot(collection(db,"recPeople"), s=>{state.recPeople=toList(s);done(s);renderRec();}, err);
   onSnapshot(doc(db,"meta","info"), s=>{ if(s.exists() && s.data().nextMeeting) $("#meetingText").textContent=s.data().nextMeeting; }, ()=>{});
-  seedIfEmpty();
+  seedIfEmpty().then(migrate1120);
 }
 
 function start(){
