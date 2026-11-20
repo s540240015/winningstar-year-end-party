@@ -139,6 +139,26 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .tier{font:inherit;font-size:13px;padding:3px 6px;width:auto}
 .tbl-in{width:80px;padding:5px 7px}
 tfoot td{font-weight:700;border-top:2px solid var(--line);border-bottom:none}
+.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pcell{display:grid;gap:4px;justify-items:start}
+.upd-list{list-style:none;margin:6px 0 8px;padding:0;display:grid;gap:6px}
+.upd-list li{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:start;font-size:14px}
+.upd-list .dt{font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+.updForm{display:flex;gap:6px;flex-wrap:wrap}
+.updForm input[name=d]{width:70px;flex:0 0 70px}
+.updForm input[name=t]{flex:1 1 180px}
+.fulltask{font-size:14px;margin:0 0 4px}
+.taskcell{display:grid;gap:6px;min-width:260px}
+.taskcell .task{font-size:14px}
+.taskcell .plbl{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin-top:2px}
+.plist{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.plist li{display:grid;grid-template-columns:48px 1fr;gap:8px;font-size:13px;color:var(--ink)}
+.plist .dt{font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.taskcell .rmk{font-size:13px;color:var(--muted)}
+.secname{display:grid;gap:4px;justify-items:start}
+.pedit{display:grid;gap:6px}
+.pedit .prow{display:grid;grid-template-columns:72px 1fr auto;gap:6px;align-items:start}
+.pedit .prow textarea{min-height:38px}
 .summary{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .summary .todo{color:var(--danger);font-size:13px;align-self:center}
 .mgr-row{display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:start;padding:6px 0;border-top:1px solid var(--line)}
@@ -208,11 +228,11 @@ html{scroll-behavior:smooth}
 <main>
   <!-- OWNERS -->
   <section class="card" id="owners">
-    <div class="sec-head"><h2>分工負責</h2><span class="hint">點狀態可切換「進行中／已完成」；點「進度」記錄已完成事項和備註</span></div>
+    <div class="sec-head"><h2>分工負責</h2><span class="hint">點「編輯」可修改主要任務、進度和狀態，也能新增進度</span></div>
     <div class="ostat" id="ownerStats"></div>
     <div class="tbl"><table>
-      <thead><tr><th>項目</th><th>負責人</th><th>主要任務</th><th>狀態</th><th>進度</th><th></th></tr></thead>
-      <tbody id="ownersBody"><tr><td colspan="6" class="empty">載入中…</td></tr></tbody>
+      <thead><tr><th>項目</th><th>負責人</th><th>主要任務＋進度</th><th></th></tr></thead>
+      <tbody id="ownersBody"><tr><td colspan="4" class="empty">載入中…</td></tr></tbody>
     </table></div>
     <details class="form-wrap writer" style="margin-top:12px">
       <summary>新增一個項目</summary>
@@ -297,6 +317,7 @@ html{scroll-behavior:smooth}
   <section class="card" id="prizes">
     <div class="sec-head"><h2>抽獎禮品</h2><span class="hint">一種禮品一行；點狀態切換「已承諾／已收到」</span></div>
     <div class="goal" id="prizeGoal"></div>
+    <div class="filters" id="prizeFilters" role="group" aria-label="依等級篩選" style="margin:0 0 10px"></div>
     <div class="tbl"><table>
       <thead><tr><th>獎品名稱</th><th>數量</th><th>贊助商</th><th>等級</th><th>狀態</th><th>備註</th><th></th></tr></thead>
       <tbody id="prizeBody"><tr><td colspan="7" class="empty">載入中…</td></tr></tbody>
@@ -437,46 +458,60 @@ const sure = (what) => window.confirm(`確定要刪除「${what}」嗎？`);
 function ownersRefresh(){
   const ae = document.activeElement;
   if(state.editing || (ae && ae.id && ae.id.startsWith("rm-"))){ state.ownersDirty = true; return; }
-  const doneIn = ae && ae.closest && ae.closest(".doneForm");
+  const doneIn = ae && ae.closest && ae.closest(".doneForm, .updForm");
+  const keepCls = doneIn ? (doneIn.classList.contains("updForm")?"updForm":"doneForm") : "", keepName = ae && ae.name;
   const keepId = doneIn ? doneIn.dataset.id : null, keepVal = doneIn ? ae.value : "";
   state.ownersDirty = false;
   renderOwners();
-  if(keepId){ const inp = document.querySelector(`.doneForm[data-id="${keepId}"] input`); if(inp){ inp.value = keepVal; inp.focus(); } }
+  if(keepId){ const inp = document.querySelector(`.${keepCls}[data-id="${keepId}"] input[name="${keepName}"]`); if(inp){ inp.value = keepVal; inp.focus(); } }
+}
+function readDraft(tr){
+  return [...tr.querySelectorAll(".prow")].map(rw=>({date:rw.querySelector("[data-p=date]").value.trim(),text:rw.querySelector("[data-p=text]").value.trim(),at:Number(rw.dataset.at)||0}));
+}
+function keepEdits(tr){
+  const v={}; tr.querySelectorAll("[data-f]").forEach(el=>v[el.dataset.f]=el.value);
+  if(v.status) v.status=Number(v.status);
+  state.ownFields=v;
+}
+function ownerProgress(d){
+  const fmt = t => { const x=new Date(t); return (x.getMonth()+1)+"/"+x.getDate(); };
+  const ups=(d.updates||[]).map(u=>({date:u.date||"",text:u.text||"",at:u.at||0}));
+  const dn=(d.done||[]).map(u=>({date:u.at?fmt(u.at):"",text:u.text||"",at:u.at||0}));
+  return ups.concat(dn).sort((x,y)=>(x.at||0)-(y.at||0));
 }
 function renderOwners(){
   const tb = $("#ownersBody");
-  const ST = ["未開始","進行中","已完成"];
+  const ST = ["","進行中","已完成"];
   const stOf = o => (o.d.status===2 ? 2 : 1);
   const cnt=[0,0,0]; state.owners.forEach(o=>cnt[stOf(o)]++);
   $("#ownerStats").innerHTML = state.owners.length ? [1,2].map(i=>`<span class="status s${i}" style="cursor:default">${ST[i]} ${cnt[i]}</span>`).join("") : "";
-  if(!state.owners.length){ tb.innerHTML = `<tr><td colspan="6" class="empty">還沒有分工項目</td></tr>`; return; }
-  const fmt = t => { const d=new Date(t); return (d.getMonth()+1)+"/"+d.getDate(); };
+  if(!state.owners.length){ tb.innerHTML = `<tr><td colspan="4" class="empty">還沒有分工項目</td></tr>`; return; }
   tb.innerHTML = state.owners.map(o => {
-    const d = o.d, st = stOf(o), done = d.done||[];
+    const d = o.d, st = stOf(o);
     if(state.editing === "o:"+o.id){
+      const d = {...o.d, ...(state.ownFields||{})}, st = (d.status===2?2:1);
+      const pr = state.ownDraft || ownerProgress(o.d);
       return `<tr class="edit-in" data-id="${o.id}">
-        <td><input data-f="section" value="${esc(d.section)}" aria-label="項目"></td>
+        <td><div class="pedit"><input data-f="section" value="${esc(d.section)}" aria-label="項目">
+          <select data-f="status" aria-label="狀態"><option value="1" ${st===1?"selected":""}>進行中</option><option value="2" ${st===2?"selected":""}>已完成</option></select></div></td>
         <td><input data-f="owner" value="${esc(d.owner)}" aria-label="負責人"></td>
-        <td colspan="3"><textarea data-f="note" aria-label="主要任務">${esc(d.note)}</textarea></td>
+        <td><div class="pedit">
+          <label class="lbl">主要任務</label><textarea data-f="note" rows="3" aria-label="主要任務">${esc(d.note)}</textarea>
+          <label class="lbl">進度</label>
+          ${pr.map((x,i)=>`<div class="prow" data-i="${i}" data-at="${x.at||""}"><input data-p="date" value="${esc(x.date)}" aria-label="日期"><textarea data-p="text" rows="2" aria-label="進度內容">${esc(x.text)}</textarea><button class="btn link del" data-a="pDel" data-i="${i}" type="button" aria-label="刪除這筆進度">✕</button></div>`).join("")}
+          <div><button class="btn" data-a="pAdd" type="button">＋ 新增進度</button></div>
+          <label class="lbl">備註</label><textarea data-f="remark" rows="2" aria-label="備註">${esc(d.remark||"")}</textarea>
+        </div></td>
         <td class="act"><button class="btn primary" data-a="saveO" type="button">儲存</button> <button class="btn link" data-a="cancel" type="button">取消</button></td></tr>`;
     }
-    const open = state.openOwner===o.id;
-    const last = done.length ? done[done.length-1].text : "";
-    let row = `<tr data-id="${o.id}"><td><b>${esc(d.section)}</b></td><td class="owner">${esc(d.owner)}</td><td>${esc(d.note)}</td>
-      <td><button class="status s${st}" data-a="stat" type="button" title="點一下切換狀態">${ST[st]}</button></td>
-      <td class="prog">${done.length?`<b>✓ ${done.length}</b> 項 · ${esc(last)}`:"—"}${d.remark?`<div>📝 ${esc(d.remark)}</div>`:""}</td>
-      <td class="act"><button class="btn link" data-a="prog" type="button" aria-expanded="${open}">${open?"收起":"進度"}</button><button class="btn link" data-a="editO" type="button">編輯</button><button class="btn link del" data-a="delO" type="button">刪除</button></td></tr>`;
-    if(open){
-      row += `<tr class="detail" data-id="${o.id}"><td colspan="6"><div class="detail-grid">
-        <div><label class="lbl">已完成事項</label>
-          ${done.length?`<ul class="done-list">${done.map((x,i)=>`<li><span class="ck">✓</span><span>${esc(x.text)}</span><span class="dt">${fmt(x.at)}</span><button class="btn link del" data-a="delDone" data-i="${i}" type="button" aria-label="刪除這項">✕</button></li>`).join("")}</ul>`:`<div class="prog" style="margin:6px 0 8px">還沒有記錄</div>`}
-          <form class="padd doneForm" data-id="${o.id}"><input name="t" placeholder="例如：已聯絡 Nationwide" aria-label="新增已完成事項"><button class="btn" type="submit">加</button></form></div>
-        <div><label class="lbl" for="rm-${o.id}">備註</label>
-          <textarea id="rm-${o.id}" rows="3" placeholder="待確認事項、卡住的地方…">${esc(d.remark||"")}</textarea>
-          <div style="margin-top:6px"><button class="btn primary" data-a="saveRemark" type="button">儲存備註</button></div></div>
-      </div></td></tr>`;
-    }
-    return row;
+    const pr = ownerProgress(d);
+    return `<tr data-id="${o.id}"><td><div class="secname"><b>${esc(d.section)}</b><span class="status s${st}" style="cursor:default">${ST[st]}</span></div></td><td class="owner">${esc(d.owner)}</td>
+      <td><div class="taskcell">
+        ${d.note?`<div class="task">${esc(d.note)}</div>`:""}
+        ${pr.length?`<div class="plbl">進度</div><ul class="plist">${pr.map(x=>`<li><span class="dt">${esc(x.date)||"—"}</span><span>${esc(x.text)}</span></li>`).join("")}</ul>`:""}
+        ${d.remark?`<div class="rmk">📝 ${esc(d.remark)}</div>`:""}
+      </div></td>
+      <td class="act"><button class="btn link" data-a="editO" type="button">編輯</button><button class="btn link del" data-a="delO" type="button">刪除</button></td></tr>`;
   }).join("");
 }
 
@@ -596,17 +631,35 @@ $("#ownersBody").addEventListener("click", e => {
   const b = e.target.closest("[data-a]"); if(!b) return;
   const tr = b.closest("tr"), id = tr.dataset.id, a = b.dataset.a;
   const row = state.owners.find(x=>x.id===id); if(!row) return;
-  if(a==="editO"){ state.editing="o:"+id; renderOwners(); }
-  else if(a==="cancel"){ state.editing=null; renderAll(); }
-  else if(a==="saveO"){ const v=rowData(tr); state.editing=null; write(()=>upd("owners",id,v)); renderOwners(); }
+  if(a==="editO"){ state.editing="o:"+id; state.ownDraft=null; state.ownFields=null; renderOwners(); }
+  else if(a==="cancel"){ state.editing=null; state.ownDraft=null; state.ownFields=null; renderAll(); }
+  else if(a==="saveO"){
+      const v=rowData(tr); v.status=Number(v.status)||1;
+      const today=Date.now();
+      v.updates=readDraft(tr).filter(x=>x.text).map((x,i)=>({date:x.date,text:x.text,at:x.at||today+i}));
+      v.done=[];
+      state.editing=null; state.ownDraft=null; state.ownFields=null; write(()=>upd("owners",id,v)); renderOwners(); }
+    else if(a==="pAdd"){ const fmt=t=>{const x=new Date(t);return (x.getMonth()+1)+"/"+x.getDate();}; const dr=readDraft(tr); dr.push({date:fmt(Date.now()),text:"",at:0}); keepEdits(tr); state.ownDraft=dr; renderOwners(); const ins=document.querySelectorAll(`tr[data-id="${id}"] [data-p=text]`); if(ins.length) ins[ins.length-1].focus(); }
+    else if(a==="pDel"){ const dr=readDraft(tr); dr.splice(Number(b.dataset.i),1); keepEdits(tr); state.ownDraft=dr; renderOwners(); }
   else if(a==="delO"){ if(window.confirm(`確定要刪除「${row.d.section}」嗎？`)) write(()=>del("owners",id)); }
   else if(a==="stat"){ const st=(row.d.status===2)?1:2; write(()=>upd("owners",id,{status:st})); }
   else if(a==="prog"){ state.openOwner = state.openOwner===id ? null : id; renderOwners(); }
+  else if(a==="delUpd"){ const updates=(row.d.updates||[]).filter((_,i)=>i!==Number(b.dataset.i)); row.d={...row.d,updates}; renderOwners(); write(()=>upd("owners",id,{updates})); }
   else if(a==="delDone"){ const done=(row.d.done||[]).filter((_,i)=>i!==Number(b.dataset.i)); row.d = {...row.d, done}; renderOwners(); write(()=>upd("owners",id,{done})); }
   else if(a==="saveRemark"){ const remark=$("#rm-"+id).value.trim(); write(()=>upd("owners",id,{remark})); }
 });
 $("#ownersBody").addEventListener("focusout", e => {
   if(e.target.id && e.target.id.startsWith("rm-") && state.ownersDirty) setTimeout(ownersRefresh, 0);
+});
+$("#ownersBody").addEventListener("submit", e => {
+  const f=e.target.closest(".updForm"); if(!f) return;
+  e.preventDefault();
+  const id=f.dataset.id, t=f.t.value.trim(), dt=f.d.value.trim(); if(!t) return;
+  const row=state.owners.find(x=>x.id===id); if(!row) return;
+  const updates=(row.d.updates||[]).concat([{date:dt,text:t,at:Date.now()}]);
+  row.d={...row.d,updates}; renderOwners();
+  const ui=document.querySelector(`.updForm[data-id="${id}"] input[name="t"]`); if(ui) ui.focus();
+  write(()=>upd("owners",id,{updates}));
 });
 $("#ownersBody").addEventListener("submit", e => {
   const f=e.target.closest(".doneForm"); if(!f) return;
@@ -624,7 +677,7 @@ $("#agendaBody").addEventListener("click", e => {
   const tr = b.closest("tr"), id = tr.dataset.id, a = b.dataset.a;
   const idx = state.agenda.findIndex(x=>x.id===id);
   if(a==="editA"){ state.editing="a:"+id; renderAgenda(); }
-  else if(a==="cancel"){ state.editing=null; renderAll(); }
+  else if(a==="cancel"){ state.editing=null; state.ownDraft=null; state.ownFields=null; renderAll(); }
   else if(a==="saveA"){ const v=rowData(tr); state.editing=null; write(()=>upd("agenda",id,v)); renderAgenda(); }
   else if(a==="delA"){ if(sure(state.agenda[idx]?.d.item||"")) write(()=>del("agenda",id)); }
   else if(a==="up"||a==="down"){
@@ -710,7 +763,7 @@ $("#provBody").addEventListener("click", e=>{
   const tr=b.closest("tr"), id=tr.dataset.id, a=b.dataset.a;
   const x=(state.providers||[]).find(y=>y.id===id); if(!x) return;
   if(a==="editP"){ state.editing="p:"+id; renderProviders(); }
-  else if(a==="cancel"){ state.editing=null; renderAll(); }
+  else if(a==="cancel"){ state.editing=null; state.ownDraft=null; state.ownFields=null; renderAll(); }
   else if(a==="saveP"){ const v={}; tr.querySelectorAll("[data-f]").forEach(el=>v[el.dataset.f]=el.value.trim()); state.editing=null; write(()=>pvUpd(id,v)); renderProviders(); }
   else if(a==="pstat"){ const st=((x.d.status||0)+1)%3; write(()=>pvUpd(id,{status:st})); }
   else if(a==="delP"){ if(window.confirm(`確定要刪除「${x.d.company}」嗎？`)) write(()=>pvDel(id)); }
@@ -735,9 +788,16 @@ function renderPrizes(){
     <div class="ostat" style="margin:0">${byTier.map(([t,n])=>`<span class="chip">${t} ${n}</span>`).join("")}${Object.entries(bySp).map(([k,n])=>`<span class="chip grey">${esc(k)} ${n}</span>`).join("")}</div>`;
   const names=[...new Set([...(state.providers||[]).map(x=>x.d.company).filter(Boolean),"WFG 自購"])];
   $("#sponsorList").innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join("");
+  const f=state.prizeFilter||"all";
+  $("#prizeFilters").innerHTML=[["all","全部"],...TIERS.map(t=>[t,t])].map(([k,lbl])=>{
+    const n=(k==="all"?list:list.filter(x=>(x.d.tier||"未分級")===k)).reduce((a,x)=>a+qtyOf(x),0);
+    return `<button class="btn ${f===k?"on":""}" data-k="${k}" type="button">${lbl} <span class="prog">${n} 份</span></button>`;
+  }).join("");
+  const shown = f==="all" ? list : list.filter(x=>(x.d.tier||"未分級")===f);
   const tb=$("#prizeBody");
+  if(list.length && !shown.length){ tb.innerHTML=`<tr><td colspan="7" class="empty">「${f}」還沒有獎品。可以在「全部」裡用每行的下拉選單分配等級。</td></tr>`; return; }
   if(!list.length){ tb.innerHTML=`<tr><td colspan="7" class="empty">還沒有獎品，請在下方加入。</td></tr>`; return; }
-  tb.innerHTML=list.map(x=>{
+  tb.innerHTML=shown.map(x=>{
     const d=x.d, st=d.status||0;
     if(state.editing==="g:"+x.id){
       return `<tr class="edit-in" data-id="${x.id}">
@@ -760,11 +820,12 @@ $("#prizeBody").addEventListener("click", e=>{
   const tr=b.closest("tr"), id=tr.dataset.id, a=b.dataset.a;
   const x=(state.prizes||[]).find(y=>y.id===id); if(!x) return;
   if(a==="editG"){ state.editing="g:"+id; renderPrizes(); }
-  else if(a==="cancel"){ state.editing=null; renderAll(); }
+  else if(a==="cancel"){ state.editing=null; state.ownDraft=null; state.ownFields=null; renderAll(); }
   else if(a==="saveG"){ const v={}; tr.querySelectorAll("[data-f]").forEach(el=>v[el.dataset.f]=el.value.trim()); state.editing=null; write(()=>pzUpd(id,v)); renderPrizes(); }
   else if(a==="gstat"){ write(()=>pzUpd(id,{status:(x.d.status||0)?0:1})); }
   else if(a==="delG"){ if(window.confirm(`確定要刪除「${x.d.name}」嗎？`)) write(()=>pzDel(id)); }
 });
+$("#prizeFilters").addEventListener("click", e=>{ const b=e.target.closest("[data-k]"); if(!b) return; state.prizeFilter=b.dataset.k; renderPrizes(); });
 $("#prizeBody").addEventListener("change", e=>{
   const sel=e.target.closest("select[data-a='tier']"); if(!sel) return;
   const id=sel.closest("tr").dataset.id; write(()=>pzUpd(id,{tier:sel.value}));
@@ -1297,7 +1358,7 @@ async function seedPrizes(){
     for(const [id,d] of Object.entries(PRIZE_SEED)) await put("prizes",id,d);
   } catch(e){ console.error(e); }
 }
-const MIG1120 = {"append": {"o01": "【11/20】依「先播 WFG 影片、再由 MC 開場」校正時間表（Jiarui）。6:30 上菜時加入主持轉場：主持人輪流、英文、每段約 2 分鐘。Provider 先上台，再 Recognition，Theresa 最後發言。Ting、Katrina 整理現場可直接使用的流程表。", "o11": "【11/20】MC 開場 5 分鐘內：歡迎賓客、帶動氣氛、引介講者；主持人發言時召集下一段人員候場、依序上台。", "o02": "【11/20】同一團隊集中同一區（初步：Theresa 團隊一區、六桌團隊一區，其餘在中央）。估約 18 桌，加 Theresa 原訂 2 桌約 20 桌；各團隊桌數填在「各 SMD 桌數」。", "o16": "【11/20】各 SMD 把桌數和人數填在「各 SMD 桌數」表；Theresa 確認第二桌實際出席人數。", "o03": "【11/20】Zhijie 確認 WFG 影片最終版本並交給 DJ；Lisa 表演影片及其他 DJ 素材也先交 Zhijie 轉 DJ。", "o04": "【11/20】填報者補齊 Last Name、獎項類別、服務年資。每個類別準備獎狀，Jean 印製（可用 AI，需要時找人幫忙），Jean、Ting 安排唱名與上台；頒獎可在用餐期間進行。", "o12": "【11/20】餐廳 4 點前還有活動，工作人員 4:00 PM 到場，趁場地收拾時開始佈置。", "o05": "【11/20】一場 7:47–8:00。提供卡片尺寸給 Amber 選小禮袋；禮袋放 Bingo 卡、筆、糖果巧克力，11/21 早上在 Flushing office 組裝。與 DJ 確認螢幕顯示已抽號碼；現場小桌放轉輪；獎品用禮品卡。筆約 25 支，待確認是否足夠。", "o06": "【11/20】自願上台、現場投票，每桌 2 支玫瑰，工作人員也可參加；主持人說明規則。準備最佳服裝禮品卡。8 分鐘或 15 分鐘以上待統一。Amber 11/21 帶 200 份烘乾紙放入小禮袋。", "o07": "【11/20】連上下台預留 8 分鐘，排在 Recognition 之後、抽獎之前。12/2、12/9 在 Flushing office 排練（12/2 晚 6 點 Lisa 有聚餐）；11/25 前與 Angie 協調排練；男主唱人選待定。", "o08": "【11/20】通知 Provider 6:00 PM 到場擺攤；上台 6:30–7:00 或 6:45–7:00 待統一，晚到者排到抽獎時段。確認 Michael、Maggie、Transamerica 到場安排；追蹤 EMS 現金贊助；再聯絡 Symetra 的 Nate。考量 compliance，現金贊助扣除 cocktail、酒、DJ 後改買禮卡。"}, "rename": {"o01": {"section": "時間表／流程表"}, "o05": {"owner": "Xiuwei + Shufang"}}, "new": {"o18": {"section": "團隊介紹", "owner": "Katrina + Ting", "note": "MC 開場後，MD、SMD 依序上台自我介紹（姓名、所在地、背景、在 WFG 的年資），不用照片投影片。確認上台名單與順序、實際出席成員，以及新任 MD 是否依辦公室海報排序。", "order": 3.5}, "o19": {"section": "餐廳付款與收據", "owner": "各 SMD", "note": "活動當天各 SMD 帶支票，每桌 $700，抬頭開給餐廳，由負責人統一結帳。餐廳按各團隊桌數開收據（列明 food and beverage）。Provider 可能當天付款，請提早到場。已付 $500 還是定金 $1,000 待核實。", "order": 9.2}, "o20": {"section": "抽獎主持與抽獎人", "owner": "Katrina + Vickie + Jean", "note": "三場抽獎由 Katrina 與另一位主持人帶領：第一場 Jean 抽；第二場時間表寫 Theresa，但 11/20 會議說由 Lisa 抽，待確認；大獎由 Vickie 與一位 Provider 抽（人選待確認）。最終獎品數、是否剔除小獎、是否加抽待定。", "order": 9.3}, "o21": {"section": "Top Producer", "owner": "Vickie + Jean", "note": "11/30 結帳後，Vickie 依個人 production report 列出全體前五名及前十名（SMD 也計入），只頒給出席者；Jean 確認得獎名單。報表交付、名單定稿與獎狀列印期限待確認。", "order": 4.2}, "o22": {"section": "廠商飲品", "owner": "Amber", "note": "確認廠商是否到場提供飲品（3 張桌子可用，可搭配我們準備的酒）；確認廠商可提供的獎品內容、數量，以及約 $200 價值是否適用。", "order": 2.9}, "o24": {"section": "卡拉 OK 與收尾大合唱", "owner": "主持人", "note": "抽獎後卡拉 OK：主持人先唱暖場（準備一首男女合唱、音域不高的歌），並引導大家到 DJ 處點歌。收尾大合唱歌曲待選（「明天會更好」不太適合）。", "order": 7.5}}, "ag": [["eq", "工作人員到場", "餐廳 4 點前還有活動，趁場地收拾時開始佈置"], ["has", "WFG Video", "先播影片讓現場安靜，再由 MC 開場"], ["has", "MC 開場", "5 分鐘內：歡迎賓客、帶動氣氛、引介講者"], ["eq", "MC转场", "英文，主持人輪流；發言時召集下一段人員候場"], ["has", "Providers", "Provider 6:00 到場擺攤；6:30–7:00 或 6:45–7:00 待統一，晚到者排到抽獎時段"], ["eq", "Recognition", "每個類別準備獎狀；Jean、Ting 安排唱名與上台；Theresa 最後發言"], ["has", "樂團", "連上下台預留 8 分鐘"], ["has", "抽獎（小獎）", "Katrina 與另一位主持人帶領"], ["eq", "Bingo", "螢幕顯示已抽號碼；卡片和筆在入場小禮袋；獎品用禮品卡"], ["has", "最佳服裝", "自願上台，每桌 2 支玫瑰投票；8 分鐘或 15 分鐘以上待統一"], ["has", "抽獎（中獎）", "11/20 會議說第二場由 Lisa 抽，待確認"], ["has", "合唱", "收尾歌曲待選（「明天會更好」不太適合）"]], "timefix": [["MC转场", "6:00-6:32", "6:30-6:32"]], "next": "11/28（五）晚上 9:00（必要時延到 10:00）", "tables": {"Theresa": {"tables": "2", "people": "", "note": "第二桌能否坐滿待確認"}}};
+const MIG1120 = {"append": {"o01": "【11/20】依「先播 WFG 影片、再由 MC 開場」校正時間表（Jiarui）。6:30 上菜時加入主持轉場：主持人輪流、英文、每段約 2 分鐘。Provider 先上台，再 Recognition，Theresa 最後發言。Ting、Katrina 整理現場可直接使用的流程表。", "o11": "【11/20】MC 開場 5 分鐘內：歡迎賓客、帶動氣氛、引介講者；主持人發言時召集下一段人員候場、依序上台。", "o02": "【11/20】同一團隊集中同一區（初步：Theresa 團隊一區、六桌團隊一區，其餘在中央）。估約 18 桌，加 Theresa 原訂 2 桌約 20 桌；各團隊桌數填在「各 SMD 桌數」。", "o16": "【11/20】各 SMD 把桌數和人數填在「各 SMD 桌數」表；Theresa 確認第二桌實際出席人數。", "o03": "【11/20】Zhijie 確認 WFG 影片最終版本並交給 DJ；Lisa 表演影片及其他 DJ 素材也先交 Zhijie 轉 DJ。", "o04": "【11/20】填報者補齊 Last Name、獎項類別、服務年資。每個類別準備獎狀，Jean 印製（可用 AI，需要時找人幫忙），Jean、Ting 安排唱名與上台；頒獎可在用餐期間進行。", "o12": "【11/20】餐廳 4 點前還有活動，工作人員 4:00 PM 到場，趁場地收拾時開始佈置。", "o05": "【11/20】一場 7:47–8:00。提供卡片尺寸給 Amber 選小禮袋；禮袋放 Bingo 卡、筆、糖果巧克力，11/21 早上在 Flushing office 組裝。與 DJ 確認螢幕顯示已抽號碼；現場小桌放轉輪；獎品用禮品卡。筆約 25 支，待確認是否足夠。", "o06": "【11/20】自願上台、現場投票，每桌 2 支玫瑰，工作人員也可參加；主持人說明規則。準備最佳服裝禮品卡。8 分鐘或 15 分鐘以上待統一。Amber 11/21 帶 200 份烘乾紙放入小禮袋。", "o07": "【11/20】連上下台預留 8 分鐘，排在 Recognition 之後、抽獎之前。12/2、12/9 在 Flushing office 排練（12/2 晚 6 點 Lisa 有聚餐）；11/25 前與 Angie 協調排練；男主唱人選待定。", "o08": "【11/20】通知 Provider 6:00 PM 到場擺攤；上台 6:30–7:00 或 6:45–7:00 待統一，晚到者排到抽獎時段。確認 Michael、Maggie、Transamerica 到場安排；追蹤 EMS 現金贊助；再聯絡 Symetra 的 Nate。考量 compliance，現金贊助扣除 cocktail、酒、DJ 後改買禮卡。"}, "rename": {"o01": {"section": "時間表／流程表"}, "o05": {"owner": "Xiuwei + Shufang"}}, "new": {"o18": {"section": "團隊介紹", "owner": "Katrina + Ting", "note": "MC 開場後，MD、SMD 依序上台自我介紹（姓名、所在地、背景、在 WFG 的年資），不用照片投影片。確認上台名單與順序、實際出席成員，以及新任 MD 是否依辦公室海報排序。", "order": 3.5}, "o19": {"section": "餐廳付款與收據", "owner": "各 SMD", "note": "活動當天各 SMD 帶支票，每桌 $700，抬頭開給餐廳，由負責人統一結帳。餐廳按各團隊桌數開收據（列明 food and beverage）。Provider 可能當天付款，請提早到場。已付 $500 還是定金 $1,000 待核實。", "order": 9.2}, "o20": {"section": "抽獎主持與抽獎人", "owner": "Katrina + Vickie + Jean", "note": "三場抽獎由 Katrina 與另一位主持人帶領：第一場 Jean 抽；第二場時間表寫 Theresa，但 11/20 會議說由 Lisa 抽，待確認；大獎由 Vickie 與一位 Provider 抽（人選待確認）。最終獎品數、是否剔除小獎、是否加抽待定。", "order": 9.3}, "o21": {"section": "Top Producer", "owner": "Vickie + Jean", "note": "11/30 結帳後，Vickie 依個人 production report 列出全體前五名及前十名（SMD 也計入），只頒給出席者；Jean 確認得獎名單。報表交付、名單定稿與獎狀列印期限待確認。", "order": 4.2}, "o22": {"section": "廠商飲品", "owner": "Amber", "note": "確認廠商是否到場提供飲品（3 張桌子可用，可搭配我們準備的酒）；確認廠商可提供的獎品內容、數量，以及約 $200 價值是否適用。", "order": 2.9}, "o24": {"section": "卡拉 OK 與收尾大合唱", "owner": "主持人", "note": "抽獎後卡拉 OK：主持人先唱暖場（準備一首男女合唱、音域不高的歌），並引導大家到 DJ 處點歌。收尾大合唱歌曲待選（「明天會更好」不太適合）。", "order": 7.5}}, "ag": [["eq", "工作人員到場", "餐廳 4 點前還有活動，趁場地收拾時開始佈置"], ["has", "WFG Video", "先播影片讓現場安靜，再由 MC 開場"], ["has", "MC 開場", "5 分鐘內：歡迎賓客、帶動氣氛、引介講者"], ["eq", "MC转场", "英文，主持人輪流；發言時召集下一段人員候場"], ["has", "Providers", "Provider 6:00 到場擺攤；6:30–7:00 或 6:45–7:00 待統一，晚到者排到抽獎時段"], ["eq", "Recognition", "每個類別準備獎狀；Jean、Ting 安排唱名與上台；Theresa 最後發言"], ["has", "樂團", "連上下台預留 8 分鐘"], ["has", "抽獎（小獎）", "Katrina 與另一位主持人帶領"], ["eq", "Bingo", "螢幕顯示已抽號碼；卡片和筆在入場小禮袋；獎品用禮品卡"], ["has", "最佳服裝", "自願上台，每桌 2 支玫瑰投票；8 分鐘或 15 分鐘以上待統一"], ["has", "抽獎（中獎）", "11/20 會議說第二場由 Lisa 抽，待確認"], ["has", "合唱", "收尾歌曲待選（「明天會更好」不太適合）"]], "timefix": [["MC转场", "6:00-6:32", "6:30-6:32"]], "next": "11/28（六）晚上 9:00（必要時延到 10:00）", "tables": {"Theresa": {"tables": "2", "people": "", "note": "第二桌能否坐滿待確認"}}};
 const addNote = (cur, add) => { cur = String(cur||""); return cur.includes(add) ? cur : (cur ? cur + (/[。；.\s]$/.test(cur)?"":"；") + add : add); };
 async function migrate1120(){
   try {
@@ -1305,7 +1366,7 @@ async function migrate1120(){
     if(flag.exists()) return;
     await put("meta","update1120",{at:Date.now()});
     // 分工：只在「主要任務」後面補充，不覆蓋大家改過的內容
-    for(const [id,add] of Object.entries(MIG1120.append)){ const d=await getDoc(doc(db,"owners",id)); if(d.exists()) await upd("owners",id,{note:addNote(d.data().note,add), ...(MIG1120.rename[id]||{})}); }
+    for(const [id,add] of Object.entries(MIG1120.append)){ const d=await getDoc(doc(db,"owners",id)); if(!d.exists()) continue; const text=add.replace(/^【11\/20】/,""); const ups=(d.data().updates||[]); if(!ups.some(u=>u.text===text)) await upd("owners",id,{updates:ups.concat([{date:"11/20",text,at:Date.now()}]), ...(MIG1120.rename[id]||{})}); }
     for(const [id,v] of Object.entries(MIG1120.rename)){ if(MIG1120.append[id]) continue; const d=await getDoc(doc(db,"owners",id)); if(d.exists()) await upd("owners",id,v); }
     for(const [id,v] of Object.entries(MIG1120.new)){ const d=await getDoc(doc(db,"owners",id)); if(!d.exists()) await put("owners",id,v); }
     // 時間表：依節目名稱在備註後面補充；修正 MC转场 6:00-6:32
