@@ -159,33 +159,13 @@ tfoot td{font-weight:700;border-top:2px solid var(--line);border-bottom:none}
 .pedit{display:grid;gap:6px}
 .pedit .prow{display:grid;grid-template-columns:72px 1fr auto;gap:6px;align-items:start}
 .pedit .prow textarea{min-height:38px}
-/* 手機：表格在卡片內左右滑動，不再把整頁撐寬 */
-main > *, section.card{min-width:0}
-.tbl{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.tbl > table{min-width:640px}
-#owners .tbl > table{min-width:600px}
-td:nth-child(4){min-width:120px}
-html,body{overflow-x:hidden}
+/* 手機：header 跟著頁面內容的寬度一起撐滿 */
+body{display:grid;grid-template-columns:auto}
 #agenda td.owner{white-space:normal;overflow-wrap:anywhere}
 #agenda th:nth-child(1){width:96px}
 #agenda th:nth-child(2){width:24%}
 #agenda th:nth-child(3){width:18%}
 #agenda td:nth-child(4){min-width:200px}
-@media (max-width:600px){
-  #owners .tbl > table, #agenda .tbl > table{min-width:0}
-  #owners thead, #agenda thead{display:none}
-  #owners tbody tr, #agenda tbody tr{display:grid;gap:6px 10px;padding:12px 0;border-bottom:1px solid var(--line)}
-  #owners tbody td, #agenda tbody td{display:block;border:none;padding:0;min-width:0}
-  #owners tbody tr{grid-template-columns:1fr auto}
-  #owners tbody td:nth-child(3), #owners tbody td.act{grid-column:1 / -1}
-  #owners tbody td.act{text-align:left}
-  #owners .taskcell{min-width:0}
-  #agenda tbody tr{grid-template-columns:84px 1fr}
-  #agenda tbody td{grid-column:2}
-  #agenda tbody td:first-child{grid-column:1;grid-row:1 / span 4;width:auto}
-  #agenda tbody td.act{text-align:left}
-  #owners tbody td[colspan], #agenda tbody td[colspan]{grid-column:1 / -1}
-}
 .summary{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .summary .todo{color:var(--danger);font-size:13px;align-self:center}
 .mgr-row{display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:start;padding:6px 0;border-top:1px solid var(--line)}
